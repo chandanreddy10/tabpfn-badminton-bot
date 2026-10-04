@@ -1,0 +1,2 @@
+tabpfn-client>=0.6
+numpy

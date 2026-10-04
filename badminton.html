@@ -1,0 +1,2697 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Badminton: play singles against TabPFN-3.5</title>
+<meta name="description" content="Top-down singles badminton in the browser. Play against TabPFN-3.5, an opponent that learns the court as you play, or against a friend on one keyboard.">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Cpath d='M20 44 L40 18 L46 24 L26 50 Z' fill='white'/%3E%3Ccircle cx='21' cy='46' r='7' fill='%23e2550b'/%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #eef1f5; --panel: #ffffff; --panel-border: #d9dee6; --text: #1b2230; --muted: #5a6476;
+    --accent: #2563eb; --btn: #f1f4f8; --btn-border: #cfd6e0; --btn-on: #dbe6fb;
+    --surround: #dfe5ec; --court: #3f8a5a; --line: #f7faf5; --line-faint: rgba(247,250,245,.45);
+    --net: #1b2230; --p1: #2563eb; --p2: #e2550b; --shuttle: #ffffff; --shadow: rgba(0,0,0,.28);
+    --wind: #6d28d9; --truth: #dc2626; --obs: #f59e0b; --good: #16a34a; --bad: #dc2626;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116; --panel: #161b22; --panel-border: #2a313c; --text: #e6e9ef; --muted: #9aa4b2;
+      --accent: #60a5fa; --btn: #1f2630; --btn-border: #323b48; --btn-on: #1e3a5f;
+      --surround: #141922; --court: #24583a; --line: #e8efe6; --line-faint: rgba(232,239,230,.35);
+      --net: #e6e9ef; --p1: #60a5fa; --p2: #fb923c; --shuttle: #f8fafc; --shadow: rgba(0,0,0,.55);
+      --wind: #c4b5fd; --truth: #f87171; --obs: #fbbf24; --good: #4ade80; --bad: #f87171;
+    }
+  }
+
+  /* Colour themes: Classic is the default above; the others override the same tokens (light + dark). */
+  :root[data-palette="midnight"] { --bg: #f4f3ff; --panel: #ffffff; --panel-border: #dcd9f5; --text: #1c1838; --muted: #5d5a7a; --accent: #6d4aff; --btn: #f1effd; --btn-border: #d3cff2; --btn-on: #e4ddff; --surround: #e6e3fa; --court: #3b3f9e; --line: #eef0ff; --line-faint: rgba(238,240,255,.45); --net: #1c1838; --p1: #0891b2; --p2: #db2777; --shuttle: #ffffff; --wind: #7c3aed; --obs: #f59e0b; --good: #059669; --bad: #e11d48; --truth: #e11d48; }
+  :root[data-palette="clay"] { --bg: #f7f1ea; --panel: #fffdfa; --panel-border: #e8dccd; --text: #2b1f17; --muted: #75655a; --accent: #c2410c; --btn: #f6ece2; --btn-border: #e2d2c1; --btn-on: #fbdcc7; --surround: #eee3d6; --court: #c0643a; --line: #fffaf3; --line-faint: rgba(255,250,243,.5); --net: #2b1f17; --p1: #1d4ed8; --p2: #047857; --shuttle: #ffffff; --wind: #7c3aed; --obs: #f59e0b; --good: #15803d; --bad: #b91c1c; --truth: #b91c1c; }
+  :root[data-palette="arena"] { --bg: #eef6f5; --panel: #ffffff; --panel-border: #cfe3e0; --text: #0f2a2a; --muted: #4e6b69; --accent: #0d9488; --btn: #e9f4f2; --btn-border: #c3dcd8; --btn-on: #ccefe9; --surround: #dcecea; --court: #0f766e; --line: #f0fdfa; --line-faint: rgba(240,253,250,.45); --net: #0f2a2a; --p1: #d97706; --p2: #e11d48; --shuttle: #ffffff; --wind: #7c3aed; --obs: #f59e0b; --good: #059669; --bad: #dc2626; --truth: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="midnight"] { --bg: #0a0b1e; --panel: #12142e; --panel-border: #262a52; --text: #e8e7ff; --muted: #a09ec8; --accent: #8b6cff; --btn: #1a1d40; --btn-border: #2f3463; --btn-on: #2d2670; --surround: #0d0f26; --court: #1d2266; --line: #b8c0ff; --line-faint: rgba(184,192,255,.35); --net: #e8e7ff; --p1: #22d3ee; --p2: #f472b6; --shuttle: #f8fafc; --wind: #c4b5fd; --obs: #fbbf24; --good: #34d399; --bad: #fb7185; --truth: #fb7185; }
+    :root[data-palette="clay"] { --bg: #16100c; --panel: #211812; --panel-border: #3a2b20; --text: #f4e9df; --muted: #b9a594; --accent: #f97316; --btn: #2b2018; --btn-border: #443226; --btn-on: #5a2e14; --surround: #1b130e; --court: #8e4526; --line: #f8e7d6; --line-faint: rgba(248,231,214,.35); --net: #f4e9df; --p1: #60a5fa; --p2: #34d399; --shuttle: #fffaf3; --wind: #c4b5fd; --obs: #fbbf24; --good: #4ade80; --bad: #f87171; --truth: #f87171; }
+    :root[data-palette="arena"] { --on-accent: #042f2e; --bg: #061413; --panel: #0c1f1e; --panel-border: #1d3b39; --text: #e3f6f3; --muted: #93b8b4; --accent: #2dd4bf; --btn: #12302e; --btn-border: #234845; --btn-on: #134e4a; --surround: #081918; --court: #115e59; --line: #ccfbf1; --line-faint: rgba(204,251,241,.35); --net: #e3f6f3; --p1: #fbbf24; --p2: #fb7185; --shuttle: #f8fafc; --wind: #c4b5fd; --obs: #fde047; --good: #4ade80; --bad: #f87171; --truth: #f87171; }
+  }
+  .theme-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .theme-row .label { font-size: 13px; color: var(--muted); margin-right: 2px; }
+  .swatch { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 2px solid var(--panel-border); cursor: pointer; }
+  .swatch[aria-checked="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent); }
+  .swatch:hover { filter: none; transform: scale(1.08); }
+  .dot.inline { margin: 0 3px 0 2px; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #app { display: flex; height: 100vh; }
+  #stage { position: relative; flex: 1; min-width: 0; background: var(--surround); }
+  #court { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+  #banner { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); max-width: 80%;
+    background: var(--panel); color: var(--text); border: 1px solid var(--panel-border); border-radius: 10px;
+    padding: 10px 18px; font-size: 17px; font-weight: 600; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+    opacity: 0; transition: opacity .25s; pointer-events: none; }
+  #banner.show { opacity: 1; }
+  #mode-tag { position: absolute; left: 14px; top: 14px; padding: 4px 10px; border-radius: 6px; font-weight: 700;
+    background: var(--truth); color: #fff; font-size: 14px; display: none; }
+  #overlay { position: absolute; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
+  #overlay.hidden { display: none; }
+  #overlay .card { max-width: 560px; max-height: 85%; overflow: auto; }
+  #overlay pre { font-size: 14px; white-space: pre-wrap; }
+  #panel { width: 340px; flex: none; overflow-y: auto; padding: 14px; background: var(--bg); border-left: 1px solid var(--panel-border); }
+  h1 { font-size: 20px; margin: 0; }
+  h2 { font-size: 15px; margin: 0 0 8px; }
+  h2 small { font-weight: 400; color: var(--muted); }
+  .sub, .muted { color: var(--muted); margin: 2px 0 0; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px; margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 13px; color: var(--muted); font-weight: 500; text-align: right; }
+  td { padding: 4px 0; }
+  td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  td.pts { font-size: 26px; font-weight: 700; width: 64px; }
+  td.gms { font-size: 18px; width: 60px; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .dot.p1 { background: var(--p1); } .dot.p2 { background: var(--p2); }
+  .serve { display: inline-block; margin-left: 6px; font-size: 12px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+    background: var(--accent); color: #fff; display: none; }
+  .serve.on { display: inline-block; }
+  .hint { margin: 8px 0 0; padding: 8px; border-radius: 8px; background: var(--btn); min-height: 42px; font-size: 14px; }
+  button, select, input[type=text] { font: inherit; font-size: 14px; color: var(--text); background: var(--btn);
+    border: 1px solid var(--btn-border); border-radius: 7px; padding: 6px 10px; }
+  button { cursor: pointer; }
+  button:hover { filter: brightness(0.97); }
+  button.primary { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  .seg { display: flex; gap: 6px; }
+  .seg button { flex: 1; }
+  .seg button[aria-pressed=true] { background: var(--btn-on); border-color: var(--accent); font-weight: 700; }
+  kbd { font-size: 12px; border: 1px solid var(--btn-border); border-radius: 4px; padding: 0 4px; color: var(--muted); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  label { display: block; margin-top: 8px; font-size: 14px; }
+  label.inline { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  label.inline select, label.inline input[type=text] { width: 160px; }
+  .slider { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; margin-top: 8px; font-size: 14px; }
+  .slider input { grid-column: 1 / 3; width: 100%; accent-color: var(--accent); }
+  .slider output { font-variant-numeric: tabular-nums; color: var(--muted); }
+  .check { display: flex; align-items: center; gap: 8px; }
+  table.kv td { font-size: 14px; padding: 2px 0; }
+  table.kv td:first-child { color: var(--muted); }
+  details { margin-top: 10px; font-size: 14px; }
+  summary { cursor: pointer; font-weight: 600; }
+  ul.small { padding-left: 18px; margin: 6px 0 0; }
+  ul.small li { margin: 4px 0; }
+  #mode-tag.think { background: var(--accent); }
+  .screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.45); z-index: 5; }
+  .screen.hidden { display: none; }
+  .start-card { max-width: 420px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
+  button.big { font-size: 17px; padding: 12px 16px; }
+  .meter { height: 10px; border-radius: 6px; background: var(--btn); border: 1px solid var(--btn-border); overflow: hidden; }
+  .meter > div { height: 100%; width: 0%; background: var(--accent); transition: width .2s; }
+  .meter.small { flex: 1; height: 8px; }
+  .kvline { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 8px; }
+  .kvline span:first-child { color: var(--muted); }
+  .badge { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--btn); border: 1px solid var(--btn-border); }
+  .badge.ok { background: var(--good); color: #fff; border-color: var(--good); }
+  .badge.warn { background: #d97706; color: #fff; border-color: #d97706; }
+  .badge.bad { background: var(--bad); color: #fff; border-color: var(--bad); }
+  .badge.pure { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .row.tight { margin-top: 0; gap: 6px; }
+  .notice { margin: 8px 0 0; padding: 8px; border-radius: 8px; font-size: 14px; background: rgba(217,119,6,.15); border: 1px solid #d97706; }
+  #court-btn.on { background: #d97706; color: #fff; border-color: #d97706; }
+  #guard-error { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 6; padding: 10px 14px; border-radius: 8px;
+    background: var(--bad); color: #fff; font-weight: 700; font-size: 15px; }
+  details.card > summary { font-size: 15px; }
+  .small-note { font-size: 13px; }
+  #dev-root table { font-size: 13px; border-collapse: collapse; width: 100%; }
+  #dev-root td, #dev-root th { padding: 2px 4px; text-align: left; border-bottom: 1px solid var(--panel-border); }
+  #dev-root h3 { font-size: 14px; margin: 14px 0 6px; } #dev-root h4 { font-size: 13px; margin: 10px 0 4px; }
+  .dev-grid { display: grid; grid-template-columns: 1fr; gap: 6px; } .dev-grid label { display: flex; justify-content: space-between; gap: 6px; }
+  .dev-scroll { max-height: 220px; overflow: auto; }
+  .help-card { max-width: 760px; max-height: 92%; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+  .help-card h2 { font-size: 20px; margin: 0; }
+  .help-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 16px; }
+  .help-grid h3 { font-size: 15px; margin: 0 0 4px; }
+  .help-grid p { margin: 0; font-size: 14px; }
+  .help ul { margin: 0; padding-left: 18px; font-size: 14px; }
+  [hidden] { display: none !important; }
+  .dev-only { display: none !important; }
+  body.dev .dev-only:not([hidden]) { display: revert !important; }
+  .ai-head { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+  .status-dot.ok { background: var(--good); } .status-dot.warn { background: #d97706; } .status-dot.bad { background: var(--bad); }
+  button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .help li { margin: 3px 0; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="court" aria-label="Badminton court"></canvas>
+    <div id="mode-tag" role="status">REPLAY</div>
+    <div id="banner" role="status" aria-live="polite"></div>
+    <div id="guard-error" class="dev-only" hidden></div>
+
+    <div id="start" class="screen">
+      <div class="card start-card">
+        <h2>Badminton</h2>
+        <p class="muted">Singles against TabPFN-3.5, an opponent that learns the court as you play.</p>
+        <button id="start-bot" class="primary big">Play vs TabPFN-3.5</button>
+        <button id="start-hotseat" class="big">Two players, one keyboard</button>
+        <p id="start-status" class="notice" hidden></p>
+        <p class="muted small-note">Press <kbd>H</kbd> at any time for how to play.</p>
+      </div>
+    </div>
+
+    <div id="warmup" class="screen hidden">
+      <div class="card start-card">
+        <h2>Getting TabPFN-3.5 ready…</h2>
+        <p class="muted">TabPFN-3.5 practises a few shots to learn the court. This takes about a minute.</p>
+        <div class="meter"><div id="warm-bar"></div></div>
+        <p id="warm-text" class="muted">0 / 30 practice shots</p>
+        <button id="warm-skip">Skip</button>
+      </div>
+    </div>
+
+    <div id="pause" class="screen hidden">
+      <div class="card start-card">
+        <h2>Connection to TabPFN-3.5 lost</h2>
+        <p id="pause-text" class="muted">The game is paused until TabPFN-3.5 responds again.</p>
+        <button id="pause-retry" class="primary big">Retry</button>
+        <p id="pause-detail" class="muted small-note dev-only"></p>
+      </div>
+    </div>
+
+    <div id="help" class="screen hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="card help-card">
+        <h2 id="help-title">How to play</h2>
+        <p class="muted">Singles badminton seen from above. You are the <span class="dot p1 inline"></span><b>first</b> player, starting in the bottom half.</p>
+        <div class="help-grid">
+          <section>
+            <h3>Move</h3>
+            <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> moves you. In two-player mode, the <span class="dot p2 inline"></span>second player uses the <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> arrow keys.</p>
+          </section>
+          <section>
+            <h3>Serve</h3>
+            <p>Click a spot inside the shaded <b>diagonal service box</b>. You serve from the right court on an even score and from the left on an odd score.</p>
+          </section>
+          <section>
+            <h3>Return the shuttle</h3>
+            <p>Get the shuttle's landing spot inside your <b>dashed reach ring</b> before it comes down. You then have <b>2 seconds</b> to choose a shot and click where to send it.</p>
+          </section>
+          <section>
+            <h3>Shots</h3>
+            <p><kbd>1</kbd> Clear: high and deep. <kbd>2</kbd> Drop: short, lands near the net. <kbd>3</kbd> Smash: fast but less accurate. The faint circle at your cursor shows where the shot may land; wind adds a drift you can't see.</p>
+          </section>
+          <section>
+            <h3>Scoring</h3>
+            <p>Every rally scores a point. A shot that lands out, a serve outside the box, or a shot nobody reaches gives the point to the other side. First to 21, win by 2, capped at 30. The rally winner serves next.</p>
+          </section>
+          <section>
+            <h3>Your opponent: TabPFN-3.5</h3>
+            <p>It warms up briefly before your first match and keeps learning while you play. Its shots fly slower to give you time to react. The game slows down for a moment while TabPFN-3.5 is predicting.</p>
+          </section>
+        </div>
+        <button id="help-close" class="primary big">Start playing</button>
+        <p class="muted small-note">Press <kbd>H</kbd> any time to see this again (the game pauses), <kbd>Esc</kbd> to close.</p>
+      </div>
+    </div>
+
+    <div id="overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="ov-title">
+      <div class="card">
+        <h2 id="ov-title"></h2>
+        <div id="ov-body"></div>
+        <div class="row">
+          <button id="ov-new" class="primary">Play again</button>
+          <button id="ov-close">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside id="panel" aria-label="Match panel">
+    <h1>Badminton</h1>
+    <p class="sub" id="subtitle">Singles</p>
+    <div class="theme-row" role="radiogroup" aria-label="Colour theme">
+      <span class="label">Theme</span>
+      <button class="swatch" role="radio" data-palette="classic" title="Classic" aria-label="Classic theme" style="background: linear-gradient(135deg, #3f8a5a 50%, #2563eb 50%)"></button>
+      <button class="swatch" role="radio" data-palette="midnight" title="Midnight" aria-label="Midnight theme" style="background: linear-gradient(135deg, #1d2266 50%, #8b6cff 50%)"></button>
+      <button class="swatch" role="radio" data-palette="clay" title="Clay" aria-label="Clay theme" style="background: linear-gradient(135deg, #c0643a 50%, #f6ece2 50%)"></button>
+      <button class="swatch" role="radio" data-palette="arena" title="Arena" aria-label="Arena theme" style="background: linear-gradient(135deg, #0f766e 50%, #fbbf24 50%)"></button>
+      <span class="label" id="theme-name">Classic</span>
+    </div>
+
+    <section class="card">
+      <table>
+        <thead><tr><th></th><th>Games</th><th>Points</th></tr></thead>
+        <tbody>
+          <tr><td><span class="dot p1"></span><b id="name0">You</b><span class="serve" id="srv0">SERVING</span></td><td class="gms" id="g0">0</td><td class="pts" id="s0">0</td></tr>
+          <tr><td><span class="dot p2"></span><b id="name1">TabPFN-3.5</b><span class="serve" id="srv1">SERVING</span></td><td class="gms" id="g1">0</td><td class="pts" id="s1">0</td></tr>
+        </tbody>
+      </table>
+      <p id="gameinfo" class="muted"></p>
+      <p id="hint" class="hint" aria-live="polite"></p>
+    </section>
+
+    <section class="card" id="aicard">
+      <div class="ai-head"><span id="ai-dot" class="status-dot"></span><b id="ai-status">TabPFN-3.5 ready</b></div>
+      <div class="kvline"><span>TabPFN-3.5 confidence</span><div class="meter small"><div id="conf-bar"></div></div><span id="conf-text">–</span></div>
+      <p id="lowctx" class="notice" hidden></p>
+      <p class="muted small-note">Every prediction TabPFN-3.5 makes comes from the TabPFN model.</p>
+      <div class="dev-only">
+        <div class="row tight">
+          <span id="tp-badge" class="badge">TabPFN: idle</span>
+          <span id="pure" class="badge pure">100% TabPFN</span>
+          <span id="calib" class="badge">calibration –</span>
+        </div>
+        <p id="bot-state" class="hint"></p>
+        <table class="kv">
+          <tr><td>TabPFN calls (landing / dynamics / shot)</td><td id="tp-counts">0 / 0 / 0</td></tr>
+          <tr><td>Last call latency · replan latency</td><td id="tp-lat">–</td></tr>
+          <tr><td>Late · failed calls</td><td id="tp-late">0 · 0</td></tr>
+          <tr><td>Context rows (landing / dynamics / shot)</td><td id="tp-ctx">0 / 0 / 0</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="seg" id="shotbtns" role="group" aria-label="Shot type">
+        <button data-shot="clear">Clear <kbd>1</kbd></button>
+        <button data-shot="drop">Drop <kbd>2</kbd></button>
+        <button data-shot="smash">Smash <kbd>3</kbd></button>
+      </div>
+      <div class="row">
+        <button id="restart" class="primary">New match</button>
+        <button id="replay">Replay last point</button>
+        <button id="menu">Main menu</button>
+      </div>
+      <div class="row">
+        <button id="court-btn">Make the court slippery</button>
+      </div>
+      <label class="check" id="mind-row"><input type="checkbox" id="mind"> Show TabPFN-3.5's planned path</label>
+      <p id="replay-status" class="muted small-note"></p>
+    </section>
+
+    <details class="card">
+      <summary>Settings</summary>
+      <label class="inline">Match format
+        <select id="bestof"><option value="1">Single game</option><option value="3">Best of 3</option></select>
+      </label>
+      <p class="muted small-note">Changes apply from the next point. Movement settings affect both players.</p>
+      <div class="slider"><span>Wind</span><output id="o-windStrength"></output>
+        <input type="range" id="windStrength" min="0" max="3" step="0.1"></div>
+      <div class="slider"><span>Shot randomness</span><output id="o-noiseMult"></output>
+        <input type="range" id="noiseMult" min="0" max="2" step="0.1"></div>
+      <div class="slider"><span>Reach</span><output id="o-reach"></output>
+        <input type="range" id="reach" min="0.4" max="2" step="0.05"></div>
+      <div class="slider"><span>Player speed</span><output id="o-playerSpeed"></output>
+        <input type="range" id="playerSpeed" min="2" max="8" step="0.1"></div>
+      <div class="slider"><span>Stopping power</span><output id="o-friction"></output>
+        <input type="range" id="friction" min="4" max="40" step="1"></div>
+      <div class="slider"><span>Grip</span><output id="o-grip"></output>
+        <input type="range" id="grip" min="0.2" max="1.5" step="0.05"></div>
+      <div class="slider"><span>Input delay</span><output id="o-lag"></output>
+        <input type="range" id="lag" min="0" max="0.3" step="0.025"></div>
+      <div class="slider"><span>TabPFN-3.5's shots fly slower by</span><output id="o-botShotSlowdown"></output>
+        <input type="range" id="botShotSlowdown" min="1" max="4" step="0.25"></div>
+      <label class="check"><input type="checkbox" id="slowmo" checked> Slow the game down while TabPFN-3.5 is predicting</label>
+      <div class="slider"><span>Slow-down speed</span><output id="o-slowspeed"></output>
+        <input type="range" id="slowspeed" min="0.02" max="0.5" step="0.01"></div>
+      <label class="inline dev-only">Seed <input id="seed" type="text" spellcheck="false"></label>
+    </details>
+
+    <details class="card">
+      <summary>Your data</summary>
+      <p class="muted small-note">Everything stays in this browser. The shot log records every shot of this session.</p>
+      <div class="row">
+        <button id="dl-csv">Download shot log (CSV)</button>
+        <button id="dl-json">Download shot log (JSON)</button>
+      </div>
+      <div class="row">
+        <button id="clearlog">Clear shot log</button>
+        <button id="reset-bot">Reset what TabPFN-3.5 learned</button>
+      </div>
+      <p id="logcount" class="muted small-note"></p>
+      <div class="dev-only">
+        <div class="row"><button id="dl-context">Download TabPFN context</button></div>
+        <label class="check"><input type="checkbox" id="debug"> Debug view (true wind, true landing, noisy trail) <kbd>G</kbd></label>
+      </div>
+    </details>
+
+    <details class="card help">
+      <summary>How to play</summary>
+      <ul>
+        <li>Move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> (in two-player mode, the <span class="dot p2 inline"></span>second player uses the arrow keys).</li>
+        <li>To serve, click a spot inside the shaded diagonal service box.</li>
+        <li>Get the landing spot inside your dashed reach ring, then choose a shot (<kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>) and click a target within 2 seconds.</li>
+        <li>Press <kbd>H</kbd> at any time for the full instructions.</li>
+      </ul>
+    </details>
+
+    <details class="card dev-only">
+      <summary>What TabPFN-3.5 sees and how it decides</summary>
+      <ul class="small">
+        <li><b>Observation (every tick):</b> own position, velocity and previous command; opponent position and velocity; phase; whether it must hit; valid zones; score; reach, speed limit, court size, nominal shot timing.</li>
+        <li><b>During a flight:</b> shot type cue, time since the hit, noisy shuttle samples every 50 ms. <b>After landing:</b> where it landed and the flight time. Never wind, noise, or the landing before it lands.</li>
+        <li><b>Landing (TabPFN):</b> at 0.2 / 0.4 / 0.6 s after the opponent's hit, a row of [time since hit, observed x/y/z at each checkpoint so far, velocity, shot cue, hitter and bot position] predicts landing minus the last observed position, and the remaining flight time, with 10/50/90 % quantiles.</li>
+        <li><b>Movement (TabPFN):</b> rows [x, y, vx, vy, ux, uy, previous ux, uy] predict the velocity change per 0.1 s. One batched 625-row grid query gives a piecewise-linear surrogate (tagged tabpfn-linearized).</li>
+        <li><b>Planner:</b> CEM over 1.2 s of commands, 8 Monte Carlo rollouts per candidate with TabPFN's uncertainty, and a chance constraint P(reach) ≥ 90 %.</li>
+        <li><b>Own shots (TabPFN):</b> random candidate targets scored by TabPFN's predicted landing spread and the opponent's distance.</li>
+      </ul>
+    </details>
+
+    <details class="card dev-only" id="devtools">
+      <summary>Developer tools</summary>
+      <div id="dev-root"><p class="muted">Developer tools load when this panel is opened. Nothing in them runs or calls TabPFN until you press a button.</p></div>
+    </details>
+  </aside>
+</div>
+
+<script>
+'use strict';
+
+// =====================================================================
+// CONFIG: every tunable in one place (units: metres, seconds)
+// Coordinates: x across the court (0 = centre line), y along it (0 = net).
+// Side +1 = bottom half of the screen (y > 0), side -1 = top half.
+// =====================================================================
+const DT = 1 / 120;                                   // fixed simulation step
+const COURT = { halfLen: 6.7, singlesHalfW: 2.59, doublesHalfW: 3.05, shortService: 1.98, doublesLongService: 0.76 };
+const SHOT_KINDS = ['serve', 'clear', 'drop', 'smash'];
+const RALLY_SHOTS = ['clear', 'drop', 'smash'];
+const DEFAULT_CONFIG = {
+  windStrength: 1.0,        // multiplier on the wind field
+  noiseMult: 1.0,           // multiplier on per-shot landing noise sigma
+  reach: 1.0,               // r: max distance from the true landing point to return it
+  playerSpeed: 4.5,         // m/s
+  accel: 22,                // m/s^2
+  friction: 22,             // m/s^2 deceleration with no input (= accel reproduces M1 exactly)
+  grip: 1.0,                // multiplier on accel / friction
+  lag: 0.0,                 // s of command delay
+  slowShotsTo: null,        // index of the player whose incoming shots fly slower (the human vs the bot), or null
+  botShotSlowdown: 3,       // flight-time multiplier for those shots: same landing point, just slower
+  recoveryTime: 0.35,       // s after hitting with reduced speed
+  recoverySpeedFactor: 0.25,
+  aimTime: 2.0,             // s for the receiver to choose a shot
+  serveAimTime: 8.0,        // s before an automatic serve
+  pointPause: 1.6, gamePause: 3.0,
+  obsInterval: 0.05,        // s between noisy observation samples
+  obsNoiseXY: 0.08, obsNoiseZ: 0.10,
+  netMargin: 0.2,           // targets must be at least this far past the net
+  dropMaxDepth: 3.5,        // drop targets: net .. this distance
+  shots: {
+    // flight time = baseTime + perMeter * distance; z(u) = h0(1-u) + 4 arc u(1-u)
+    serve: { baseTime: 1.00, perMeter: 0.040, h0: 1.1, arc: 1.3, noise: 0.12, drift: 0.10, dragK: 1.6 },
+    clear: { baseTime: 1.30, perMeter: 0.050, h0: 2.2, arc: 5.5, noise: 0.35, drift: 0.18, dragK: 2.2 },
+    drop:  { baseTime: 1.00, perMeter: 0.060, h0: 2.2, arc: 1.6, noise: 0.15, drift: 0.12, dragK: 2.6 },
+    smash: { baseTime: 0.35, perMeter: 0.020, h0: 2.8, arc: 0.0, noise: 0.45, drift: 0.04, dragK: 0.8 },
+  },
+};
+// "Slippery court / tired legs": applied mid-rally through a recorded env event (replay-safe).
+const COURT_CHANGE = { grip: 0.35, speedMult: 0.75 };
+const KEYMAP_P1 = { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD' };
+const KEYMAP_P2 = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+
+const clone = o => JSON.parse(JSON.stringify(o));
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const r4 = v => Math.round(v * 1e4) / 1e4;
+const hyp = Math.hypot;
+
+// =====================================================================
+// RNG: seeded mulberry32 + Box-Muller. A stream is a plain {s} object,
+// so it can be JSON-snapshotted together with the sim state.
+// =====================================================================
+const RNG = {
+  hash(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  },
+  stream(seedInt, name) { return { s: (seedInt ^ RNG.hash(name)) >>> 0 }; },
+  next(st) {
+    st.s = (st.s + 0x6D2B79F5) >>> 0;
+    let t = st.s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  },
+  gauss(st) {
+    const u = Math.max(RNG.next(st), 1e-12), v = RNG.next(st);
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  },
+};
+
+// =====================================================================
+// WIND: pure function of (seeded params, x, y, t). A slowly drifting base
+// vector plus travelling gust pulses that vary across the court.
+// =====================================================================
+const Wind = {
+  makeParams(seedInt) {
+    const r = RNG.stream(seedInt, 'wind'), u = () => RNG.next(r);
+    const ang = u() * 2 * Math.PI, mag = 0.6 + 0.9 * u();
+    const slow = [0, 1].map(() => ({ amp: 0.5 + 0.5 * u(), w: 2 * Math.PI / (25 + 50 * u()), ph: u() * 2 * Math.PI }));
+    const gusts = [0, 1, 2].map(() => {
+      const a = u() * 2 * Math.PI, ka = u() * 2 * Math.PI, kk = 0.2 + 0.4 * u();
+      return { amp: 0.6 + 0.9 * u(), dx: Math.cos(a), dy: Math.sin(a), kx: kk * Math.cos(ka), ky: kk * Math.sin(ka),
+               w: 0.25 + 0.6 * u(), ph: u() * 2 * Math.PI };
+    });
+    return { bx: mag * Math.cos(ang), by: mag * Math.sin(ang), slow, gusts };
+  },
+  at(P, strength, x, y, t) {
+    let wx = P.bx + P.slow[0].amp * Math.sin(P.slow[0].w * t + P.slow[0].ph);
+    let wy = P.by + P.slow[1].amp * Math.sin(P.slow[1].w * t + P.slow[1].ph);
+    for (const g of P.gusts) {
+      const s = Math.sin(g.kx * x + g.ky * y - g.w * t + g.ph);
+      const a = s > 0 ? g.amp * s * s : 0;
+      wx += a * g.dx; wy += a * g.dy;
+    }
+    return { x: wx * strength, y: wy * strength };
+  },
+};
+
+// =====================================================================
+// PHYSICS: pure functions, no drawing, no globals besides constants.
+// =====================================================================
+const Physics = {
+  /** Plan a shot: true landing = target + wind drift + Gaussian noise. */
+  plan({ from, target, type, t0 }, windP, cfg, rng) {
+    const sp = cfg.shots[type];
+    const dist = hyp(target.x - from.x, target.y - from.y);
+    const T = sp.baseTime + sp.perMeter * dist;
+    let mx = 0, my = 0; const N = 8;              // mean wind along the nominal path
+    for (let i = 0; i < N; i++) {
+      const u = (i + 0.5) / N;
+      const w = Wind.at(windP, cfg.windStrength, from.x + (target.x - from.x) * u, from.y + (target.y - from.y) * u, t0 + u * T);
+      mx += w.x / N; my += w.y / N;
+    }
+    const drift = { x: mx * T * sp.drift, y: my * T * sp.drift };   // drag-damped drift
+    const sig = sp.noise * cfg.noiseMult;
+    const noise = { x: RNG.gauss(rng) * sig, y: RNG.gauss(rng) * sig };
+    return {
+      type, t0, T, from: { x: from.x, y: from.y }, target: { x: target.x, y: target.y }, drift, noise,
+      landing: { x: target.x + drift.x + noise.x, y: target.y + drift.y + noise.y },
+      windAtHit: Wind.at(windP, cfg.windStrength, from.x, from.y, t0), meanWind: { x: mx, y: my },
+      h0: sp.h0, arc: sp.arc, k: sp.dragK,
+    };
+  },
+  /** True shuttle position t seconds after the hit (drag-eased, wind bends it progressively). */
+  shuttleAt(p, t) {
+    const u = clamp(t / p.T, 0, 1);
+    const s = p.k > 1e-6 ? (1 - Math.exp(-p.k * u)) / (1 - Math.exp(-p.k)) : u;
+    const bx = p.target.x + p.noise.x, by = p.target.y + p.noise.y;
+    return {
+      x: p.from.x + (bx - p.from.x) * s + p.drift.x * u * u,
+      y: p.from.y + (by - p.from.y) * s + p.drift.y * u * u,
+      z: Math.max(0, p.h0 * (1 - u) + 4 * p.arc * u * (1 - u)),
+    };
+  },
+  /** One movement step: acceleration toward move*vmax, clamped to the player's own half.
+   *  M3: command lag (cfg.lag), friction when idle, grip, and the court-change env multipliers.
+   *  Defaults (lag 0, friction = accel, grip 1, no env change) reproduce M1 exactly. */
+  stepPlayer(p, mv, dt, cfg, locked, env) {
+    const q = { ...p };
+    const lagTicks = Math.round((cfg.lag || 0) / dt);
+    let cmd = mv;
+    if (lagTicks > 0) {                                  // apply the command issued lagTicks ago
+      const buf = (q.cmdBuf || []).concat([{ x: mv.x, y: mv.y }]);
+      cmd = buf.length > lagTicks ? buf.shift() : { x: 0, y: 0 };
+      q.cmdBuf = buf;
+    }
+    q.lastCmd = { x: mv.x, y: mv.y };
+    if (locked) { q.vx = 0; q.vy = 0; if (q.cmdBuf) q.cmdBuf = []; }
+    else {
+      let mx = cmd.x, my = cmd.y; const L = hyp(mx, my);
+      if (L > 1) { mx /= L; my /= L; }
+      const grip = (cfg.grip == null ? 1 : cfg.grip) * (env ? env.grip : 1);
+      const vmax = cfg.playerSpeed * (env ? env.speedMult : 1) * (q.recover > 0 ? cfg.recoverySpeedFactor : 1);
+      const rate = (L < 0.05 && cfg.friction != null ? cfg.friction : cfg.accel) * grip;
+      let dvx = mx * vmax - q.vx, dvy = my * vmax - q.vy;
+      const dv = hyp(dvx, dvy), lim = rate * dt;
+      if (dv > lim) { dvx *= lim / dv; dvy *= lim / dv; }
+      q.vx += dvx; q.vy += dvy; q.x += q.vx * dt; q.y += q.vy * dt;
+    }
+    const xm = COURT.doublesHalfW + 0.9, ym = COURT.halfLen + 1.0, nm = 0.25;
+    const y0 = q.side > 0 ? nm : -ym, y1 = q.side > 0 ? ym : -nm;
+    if (q.x < -xm) { q.x = -xm; q.vx = 0; } if (q.x > xm) { q.x = xm; q.vx = 0; }
+    if (q.y < y0) { q.y = y0; q.vy = 0; }   if (q.y > y1) { q.y = y1; q.vy = 0; }
+    if (q.recover > 0) q.recover--;
+    return q;
+  },
+};
+
+// =====================================================================
+// RULES: pure scoring / serving / court geometry.
+// =====================================================================
+const Rules = {
+  newMatch(bestOf) {
+    return { scores: [0, 0], games: [0, 0], gameIdx: 0, server: 0, ends: [1, -1], bestOf, over: false, matchWinner: null, history: [] };
+  },
+  gameWinner(sc) {
+    for (const w of [0, 1]) { const s = sc[w], o = sc[1 - w]; if ((s >= 21 && s - o >= 2) || s >= 30) return w; }
+    return -1;
+  },
+  /** Rally scoring: winner of the rally serves next; game winner serves first next game; ends switch each game. */
+  awardPoint(st, winner) {
+    const s = clone(st), events = [];
+    s.scores[winner]++; s.server = winner;
+    const gw = Rules.gameWinner(s.scores);
+    if (gw >= 0) {
+      s.games[gw]++; s.history.push(s.scores.slice());
+      events.push({ type: 'gameWon', winner: gw, scores: s.scores.slice(), gameIdx: s.gameIdx });
+      if (s.games[gw] > Math.floor(s.bestOf / 2)) { s.over = true; s.matchWinner = gw; events.push({ type: 'matchWon', winner: gw }); }
+      else { s.gameIdx++; s.scores = [0, 0]; s.ends = [s.ends[1], s.ends[0]]; s.server = gw; events.push({ type: 'switchEnds' }); }
+    }
+    return { state: s, events };
+  },
+  /** x-sign of the court the server stands in: right court on an even score, left on odd. */
+  serverCourtSign(st) { const sv = st.server; return st.ends[sv] * (st.scores[sv] % 2 === 0 ? 1 : -1); },
+  /** Diagonal singles service box: short service line .. back line, inside singles sidelines. */
+  serviceBox(st) {
+    const rs = st.ends[1 - st.server], xs = -Rules.serverCourtSign(st);
+    const W = COURT.singlesHalfW, L = COURT.halfLen, S = COURT.shortService;
+    return { x0: xs > 0 ? 0 : -W, x1: xs > 0 ? W : 0, y0: rs > 0 ? S : -L, y1: rs > 0 ? L : -S };
+  },
+  halfRect(side) {
+    const W = COURT.singlesHalfW, L = COURT.halfLen;
+    return { x0: -W, x1: W, y0: side > 0 ? 0 : -L, y1: side > 0 ? L : 0 };
+  },
+  /** Area in which a shot of `type` from `hitterSide` may be aimed. */
+  zoneFor(st, hitterSide, type, cfg) {
+    if (type === 'serve') return Rules.serviceBox(st);
+    const o = -hitterSide, W = COURT.singlesHalfW;
+    const near = cfg.netMargin, far = type === 'drop' ? cfg.dropMaxDepth : COURT.halfLen;
+    return { x0: -W, x1: W, y0: o > 0 ? near : -far, y1: o > 0 ? far : -near };
+  },
+  inRect(p, r) { return p.x >= r.x0 && p.x <= r.x1 && p.y >= r.y0 && p.y <= r.y1; },
+  clampTo(p, r) { return { x: clamp(p.x, r.x0, r.x1), y: clamp(p.y, r.y0, r.y1) }; },
+  center(r) { return { x: (r.x0 + r.x1) / 2, y: (r.y0 + r.y1) / 2 }; },
+};
+
+// =====================================================================
+// OBSERVATION: the only thing controllers ever see. It contains noisy
+// shuttle samples taken every cfg.obsInterval since the last hit plus
+// both players' states. It never contains wind, the true landing point
+// or the true trajectory.
+// PHASE 2: the BotController turns `incoming.samples` at its checkpoints
+// (e.g. timeSinceHit >= 0.2 / 0.4 / 0.6 s) into one tabular feature row
+// (early positions, velocities, timeSinceHit, shotType, own position).
+// =====================================================================
+const Observation = {
+  build(S, i) {
+    const me = S.players[i], op = S.players[1 - i], cfg = S.cfg;
+    const pub = p => ({ x: r4(p.x), y: r4(p.y), vx: r4(p.vx), vy: r4(p.vy), recovering: p.recover > 0 });
+    const selfObs = { ...pub(me), cmdPrev: me.lastCmd ? { x: me.lastCmd.x, y: me.lastCmd.y } : { x: 0, y: 0 } };
+    let mustHit = false, aimTimeLeft = null, validZones = null;
+    if (S.phase === 'serve' && S.rules.server === i) {
+      mustHit = true; aimTimeLeft = r4((S.phaseEndTick - S.tick) * DT);
+      validZones = { serve: Rules.serviceBox(S.rules) };
+    } else if (S.phase === 'aim' && S.aim.player === i) {
+      mustHit = true; aimTimeLeft = r4((S.aim.endTick - S.tick) * DT);
+      validZones = {};
+      for (const k of RALLY_SHOTS) validZones[k] = Rules.zoneFor(S.rules, me.side, k, cfg);
+    }
+    let incoming = null;
+    if (S.phase === 'flight' && S.shot) {
+      incoming = { shotId: S.shot.id, hitter: S.shot.hitter, shotType: S.shot.type, isServe: S.shot.isServe,
+                   timeSinceHit: r4((S.tick - S.shot.startTick) * DT), samples: S.shot.samples.slice() };
+    }
+    // Revealed only AFTER the shuttle has come down (everyone can see where it landed).
+    // The intended target is private: only the shot's own hitter gets it back.
+    const ll = S.lastLanding;
+    const lastLanding = ll ? { shotId: ll.shotId, hitter: ll.hitter, shotType: ll.shotType, isServe: ll.isServe,
+      x: r4(ll.x), y: r4(ll.y), tArrival: ll.tArrival, outcome: ll.outcome, target: ll.hitter === i ? ll.target : null } : null;
+    const shotTiming = {};
+    for (const k of SHOT_KINDS) { const s = cfg.shots[k]; shotTiming[k] = { baseTime: s.baseTime, perMeter: s.perMeter, dragK: s.dragK }; }
+    return {
+      t: r4(S.tick * DT), me: i, side: me.side, phase: S.phase, self: selfObs, opponent: pub(op),
+      mustHit, aimTimeLeft, validZones, incoming, lastLanding,
+      score: { me: S.rules.scores[i], opp: S.rules.scores[1 - i], gamesMe: S.rules.games[i], gamesOpp: S.rules.games[1 - i] },
+      server: S.rules.server,
+      // Public "laws of the game": court size and nominal shot timing / drag. Wind and noise stay hidden.
+      params: { reach: cfg.reach, maxSpeed: cfg.playerSpeed, accel: cfg.accel, obsInterval: cfg.obsInterval, aimTime: cfg.aimTime,
+                oppReceiveTimeScale: cfg.slowShotsTo === 1 - i ? cfg.botShotSlowdown : 1,
+                court: { halfLen: COURT.halfLen, singlesHalfW: COURT.singlesHalfW, shortService: COURT.shortService }, shotTiming },
+    };
+  },
+};
+
+// =====================================================================
+// CONTROLLERS
+// Interface (every player is driven by one):
+//   observe(observation)  receives the per-tick Observation (never the true state)
+//   act() -> { move: {x, y} in [-1, 1],
+//              hit?:  { target: {x, y}, shotType },   commit a shot (only used when obs.mustHit)
+//              aim?:  { target: {x, y}, shotType } }  current preview, used as the timeout default
+// act() is SYNCHRONOUS and must return immediately with the latest intention.
+// PHASE 2: BotController keeps that contract. observe() fires async requests to
+// a TabPFN backend (fetch) at flight checkpoints and stores the promise results.
+// act() returns the cached move (toward the predicted landing) and, during the aim
+// phase, the best (target, shotType) found by its MPC search. The game loop never
+// awaits, so a slow backend only makes the bot react later, as a human would.
+// =====================================================================
+class HumanController {
+  constructor(input, keymap) { this.input = input; this.keys = keymap; this.obs = null; }
+  observe(obs) { this.obs = obs; }
+  act() {
+    const k = this.input.keys, m = this.keys;
+    const out = { move: { x: (k.has(m.right) ? 1 : 0) - (k.has(m.left) ? 1 : 0), y: (k.has(m.down) ? 1 : 0) - (k.has(m.up) ? 1 : 0) } };
+    const o = this.obs;
+    if (o && o.mustHit) {
+      const type = o.phase === 'serve' ? 'serve' : this.input.selectedShot;
+      const zone = o.validZones[type];
+      if (this.input.mouse) out.aim = { target: Rules.clampTo(this.input.mouse, zone), shotType: type };
+      const c = this.input.takeClick();
+      if (c) out.hit = { target: Rules.clampTo(c, zone), shotType: type };
+    }
+    return out;
+  }
+}
+
+/** Feeds recorded (sanitised) actions back in, for exact rally replay. */
+class ReplayController {
+  constructor(actions, idx) { this.a = actions; this.i = idx; this.k = 0; }
+  observe() {}
+  act() { const r = this.a[this.k++]; return r ? r[this.i] : { move: { x: 0, y: 0 } }; }
+}
+
+// =====================================================================
+// MILESTONE 3: TABPFN-ONLY BOT (play mode)
+//
+// Every learned or predictive part of the bot comes from TabPFN:
+//   landing  : TabularLandingEstimator  over TabPFNRegressorAdapter
+//   dynamics : TabularDynamicsModel     over TabPFNRegressorAdapter (local linearization
+//              built purely from TabPFN queries, provenance "tabpfn-linearized")
+//   own shots: TabularShotModel         over TabPFNRegressorAdapter
+// The CEM planner, the cost, court/speed limits, braking (zero command) and the warm-up
+// exploration controller are not predictors. Non-TabPFN providers exist only in
+// dev-tools.js (loaded on demand) and are refused here by ProvenanceGuard.
+// =====================================================================
+const BOTCFG = {
+  landing: { checkpoints: [0.2, 0.4, 0.6], window: 120, minRows: 10, shotCue: true },
+  dynamics: { window: 300, windowSec: 90, minRows: 30, refitFrac: 0.25, dedupEps: 0.03, retryMs: 2000,
+              gridV: 5, gridU: 5,            // TabPFN surrogate grid: 5x5 velocities x 5x5 commands = 625 rows, 1 call
+              minRefreshMs: 6000,            // at most one surrogate refresh per 6 s (API rate limit)
+              ttlMs: 20000 },                // a surrogate older than this (no successful refresh) counts as late
+  shot: { window: 100, minRows: 6, candidatesPerType: 8, serveCandidates: 12, epsilon: 0.1 },
+  mpc: {
+    planner: 'cem', N: 48, elites: 8, iters: 4, H: 12, dt: 0.1, S: 8, p: 0.9, sigma0: 0.6,
+    linearize: true,            // false = strict per-step TabPFN rollout (slow: H sequential batched calls per plan)
+    strictN: 24,                // candidates in strict mode (x S rollouts = 192 rows per call)
+    ctrlTicks: 12,              // control period = 12 * DT = 0.1 s
+    w: { term: 4, cc: 30, effort: 0.05, rec: 0.4 },
+  },
+  slowmo: { on: true, speed: 0.05 },
+  unavailableMs: 5000, slowMs: 4000, requestTimeoutMs: 20000,
+  rate: { perMinute: 60, reserveForCritical: 12 },   // TabPFN API: 60 predict requests / minute
+  // The API prices every predict request at ~10k tokens regardless of size (quoted via /api/estimate), so by
+  // default the targets of one task are stacked into ONE TabPFN regression (standardized targets + a target
+  // indicator column). false = one regressor per coordinate (the spec's layout, k times the cost).
+  stackTargets: true,
+  tokensPerCall: 10000,
+  warmup: { machineShots: 20, botShots: 10 },
+  lowContext: { landing: 15, dynamics: 60, shot: 6 },
+  storageKey: 'badminton.tabpfn.m3.v1',
+};
+
+const Clock = { now: () => (typeof performance !== 'undefined' ? performance.now() : Date.now()) };
+function erf(x) {           // Abramowitz-Stegun 7.1.26
+  const s = Math.sign(x); x = Math.abs(x);
+  const t = 1 / (1 + 0.3275911 * x);
+  return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x));
+}
+const normCdf = z => 0.5 * (1 + erf(z / Math.SQRT2));
+const probInRect = (mx, sx, my, sy, r) =>
+  (normCdf((r.x1 - mx) / sx) - normCdf((r.x0 - mx) / sx)) * (normCdf((r.y1 - my) / sy) - normCdf((r.y0 - my) / sy));
+const oneHot = t => SHOT_KINDS.map(k => (k === t ? 1 : 0));
+const mean = a => a.reduce((s, v) => s + v, 0) / (a.length || 1);
+const clipNorm = u => { const L = hyp(u[0], u[1]); return L > 1 ? [u[0] / L, u[1] / L] : u; };
+function sampleAt(samples, c) {
+  let best = null;
+  for (const s of samples) if (Math.abs(s.t - c) < 0.026 && (!best || Math.abs(s.t - c) < Math.abs(best.t - c))) best = s;
+  return best;
+}
+
+// ---------------------------------------------------------------------
+// Provenance guard, call log, health, calibration
+// ---------------------------------------------------------------------
+const PROVENANCE_OK = new Set(['tabpfn', 'tabpfn-linearized']);
+const Guard = {
+  mode: 'play',          // 'play' | 'dev'. 'dev' is set for the session only by the developer tools.
+  strictThrow: false,    // developer mode (default; off with ?dev=0): a violation throws a visible error
+  counters: { landing: 0, dynamics: 0, shot: 0 },
+  accepted: 0, rejected: 0, lastViolation: null, onViolation: null,
+  /** Every estimate / dynamics prediction passes here before the planner may use it. */
+  check(out, task) {
+    if (out && (this.mode === 'dev' || PROVENANCE_OK.has(out.provenance))) { this.accepted++; return true; }
+    this.rejected++;
+    this.lastViolation = `${task}: output with provenance "${out && out.provenance}" refused in play mode`;
+    if (this.onViolation) this.onViolation(this.lastViolation);
+    if (this.strictThrow) throw new Error('[ProvenanceGuard] ' + this.lastViolation);
+    return false;
+  },
+};
+const CallLog = {
+  entries: [], max: 400, apiCalls: 0,      // apiCalls x BOTCFG.tokensPerCall = estimated quota used this session
+  add(e) { this.entries.push({ wall: Math.round(Clock.now()), ...e }); if (this.entries.length > this.max) this.entries.shift(); },
+};
+const TabPFNHealth = {
+  lastOk: null, failStart: null, failed: 0, lastMs: null, lastError: null,
+  ok(ms) { this.lastOk = Clock.now(); this.failStart = null; this.lastMs = ms; },
+  fail(err) { this.failed++; if (err) this.lastError = String(err.message || err).slice(0, 160); if (this.failStart === null) this.failStart = Clock.now(); },
+  reset() { this.failStart = null; RateBudget.blockedUntil = 0; },
+  unavailable() { return this.failStart !== null && Clock.now() - this.failStart > BOTCFG.unavailableMs; },
+  status() {
+    if (RateBudget.blockedUntil > Clock.now()) return 'rate-limited';
+    if (this.failStart !== null) return this.unavailable() ? 'unavailable' : 'slow';
+    if (this.lastMs !== null && this.lastMs > BOTCFG.slowMs) return 'slow';
+    return this.lastOk !== null ? 'connected' : 'idle';
+  },
+};
+/** Client-side budget for the API's per-minute predict limit (each target is one request).
+ *  Critical calls (landing, own shot) may use everything; dynamics refreshes leave a reserve. */
+const RateBudget = {
+  log: [], blockedUntil: 0, deferred: 0,
+  used() { const t = Clock.now() - 60000; while (this.log.length && this.log[0] < t) this.log.shift(); return this.log.length; },
+  take(units, priority) {
+    const R = BOTCFG.rate, free = R.perMinute - this.used() - (priority === 'low' ? R.reserveForCritical : 0);
+    if (Clock.now() < this.blockedUntil || units > free) { this.deferred++; return false; }
+    for (let i = 0; i < units; i++) this.log.push(Clock.now());
+    return true;
+  },
+  /** The API answered 429: block until its retry time. */
+  rateLimited(msg) { const m = /Retry in (\d+)s/.exec(msg || ''); this.blockedUntil = Clock.now() + 1000 * (m ? +m[1] + 1 : 15); },
+};
+class Coverage {
+  constructor() { this.n = 0; this.inside = 0; }
+  add(ok) { this.n++; if (ok) this.inside++; }
+  get rate() { return this.n ? this.inside / this.n : null; }
+}
+
+// ---------------------------------------------------------------------
+// TabPFN connection (unchanged from M2) + the thin TabularRegressor adapter
+// ---------------------------------------------------------------------
+const TabPFNClient = {
+  online: false, backend: 'none', status: 'Checking for the TabPFN server…', url: null,
+  base() {
+    if (this.url) return this.url;
+    return (typeof location !== 'undefined' && /^https?:$/.test(location.protocol)) ? '' : null;
+  },
+  async health() {
+    const b = this.base();
+    if (b === null) { this.status = 'Opened as a file: run "python server.py" and open http://localhost:8000.'; return; }
+    try {
+      const j = await (await fetch(b + '/api/health')).json();
+      this.backend = j.backend; this.online = j.backend !== 'none';
+      this.status = j.backend === 'tabpfn' ? 'TabPFN API connected.'
+        : j.backend === 'mock' ? 'Server is in TABPFN_MOCK mode: play mode refuses non-TabPFN outputs.'
+        : (j.tabpfnClientInstalled ? 'TABPFN_TOKEN is empty in .env.' : 'tabpfn-client is not installed on the server.');
+    } catch (e) { this.online = false; this.status = 'TabPFN server unreachable.'; }
+  },
+  /** Fire-and-forget: ask the server to fit this table now, so the next predict on it is fast. */
+  prefit(X_train, y_train) {
+    if (this.base() === null) return;
+    fetch(this.base() + '/api/fit', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ X_train, y_train, stack: BOTCFG.stackTargets }) }).catch(() => {});
+  },
+  /** Fit and wait until the server has the fitted context cached. */
+  async fit(X_train, y_train) {
+    const r = await fetch(this.base() + '/api/fit', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ X_train, y_train, wait: true, stack: BOTCFG.stackTargets }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    return j;
+  },
+  async predict(X_train, y_train, X_test) {
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = setTimeout(() => ctl && ctl.abort(), BOTCFG.requestTimeoutMs);
+    try {
+      const r = await fetch(this.base() + '/api/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ X_train, y_train, X_test, stack: BOTCFG.stackTargets }), signal: ctl ? ctl.signal : undefined });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+      return j;
+    } finally { clearTimeout(timer); }
+  },
+};
+
+/** TabularRegressor over the existing TabPFN connection: fit(X, Y) / async predict(Xq).
+ *  A new context becomes active once the server has fitted it, so queries never wait on a refit. */
+class TabPFNRegressorAdapter {
+  constructor(client, task) { this.client = client; this.task = task; this.ctx = null; this.pendingCtx = null; this.version = 0; }
+  get rows() { return this.ctx ? this.ctx.X.length : 0; }
+  fit(X, Y) {
+    const ctx = { X, Y, version: ++this.version };
+    if (!this.ctx) { this.ctx = ctx; this.client.prefit(X, Y); return Promise.resolve(); }
+    this.pendingCtx = ctx;
+    return this.client.fit(X, Y).then(() => { if (this.pendingCtx === ctx) { this.ctx = ctx; this.pendingCtx = null; } },
+                                      () => { if (this.pendingCtx === ctx) this.pendingCtx = null; });
+  }
+  async predict(Xq, priority = 'high') {
+    const ctx = this.ctx, t0 = Clock.now();
+    const units = BOTCFG.stackTargets ? 1 : Object.keys(ctx.Y).length;
+    if (!RateBudget.take(units, priority)) {                             // over the API budget: defer, never substitute
+      CallLog.add({ task: this.task, rows: ctx.X.length, batch: Xq.length, ms: 0, outcome: 'deferred (rate budget)', provenance: 'tabpfn' });
+      throw Object.assign(new Error('deferred: TabPFN rate budget'), { deferred: true });
+    }
+    Guard.counters[this.task] = (Guard.counters[this.task] || 0) + 1;
+    try {
+      const res = await this.client.predict(ctx.X, ctx.Y, Xq);
+      const ms = Math.round(Clock.now() - t0), provenance = res.backend === 'tabpfn' ? 'tabpfn' : 'backend:' + res.backend;
+      const targets = {};
+      for (const k of Object.keys(ctx.Y)) {
+        const r = res[k];
+        targets[k] = r.q50.map((m, i) => ({ mean: m, std: Math.max(1e-3, (r.q90[i] - r.q10[i]) / 2.563), q10: r.q10[i], q50: m, q90: r.q90[i] }));
+      }
+      if (provenance === 'tabpfn') TabPFNHealth.ok(ms); else TabPFNHealth.fail();
+      CallLog.add({ task: this.task, rows: ctx.X.length, batch: Xq.length, ms, outcome: 'ok', provenance, apiCalls: res.api_calls || units });
+      CallLog.apiCalls += res.api_calls || units;
+      return { targets, provenance, ms };
+    } catch (e) {
+      if (/Rate limit|HTTP 429/i.test(String(e.message))) RateBudget.rateLimited(String(e.message));
+      TabPFNHealth.fail(e);
+      CallLog.add({ task: this.task, rows: ctx ? ctx.X.length : 0, batch: Xq.length, ms: Math.round(Clock.now() - t0), outcome: 'failed', provenance: 'tabpfn', error: String(e.message || e) });
+      throw e;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------
+// Landing estimator: rows -> TabPFN -> { mean, cov, tArrival, tArrivalSigma, provenance }
+// Target = landing point minus the last observed shuttle position (a coordinate shift), and
+// the remaining flight time. One regressor per target, all in one batched call.
+// ---------------------------------------------------------------------
+const LandingRows = {
+  names(k, cps, cue) {
+    const n = ['tSinceHit'];
+    for (let j = 0; j <= k; j++) n.push(`obsX@${cps[j]}`, `obsY@${cps[j]}`, `obsZ@${cps[j]}`);
+    n.push('velX', 'velY', 'velZ');
+    if (cue) n.push('isServe', 'isClear', 'isDrop', 'isSmash');
+    return n.concat(['hitterX', 'hitterY', 'botX', 'botY']);
+  },
+  row(e, k, cps, cue) {
+    const pts = [];
+    for (let j = 0; j <= k; j++) { const s = sampleAt(e.samples, cps[j]); if (!s) return null; pts.push(s); }
+    const last = pts[k], prev = sampleAt(e.samples, cps[k] - 0.1) || sampleAt(e.samples, cps[k] - 0.05);
+    if (!prev || !e.botAt || !e.botAt[k]) return null;
+    const dt = (last.t - prev.t) || 0.1, x = [cps[k]];
+    for (const p of pts) x.push(p.x, p.y, p.z);
+    x.push(r4((last.x - prev.x) / dt), r4((last.y - prev.y) / dt), r4((last.z - prev.z) / dt));
+    if (cue) x.push(...oneHot(e.type));
+    x.push(r4(e.p0.x), r4(e.p0.y), r4(e.botAt[k].x), r4(e.botAt[k].y));
+    return { x, last };
+  },
+  table(entries, k, cps, cue) {
+    const items = [];
+    for (const e of entries) {
+      if (!e.landing) continue;
+      const q = LandingRows.row(e, k, cps, cue);
+      if (q) items.push({ e, x: q.x, y: { dx: r4(e.landing.x - q.last.x), dy: r4(e.landing.y - q.last.y), tr: r4(e.tArrival - cps[k]) } });
+    }
+    return items;
+  },
+};
+
+class TabularLandingEstimator {
+  constructor(makeReg, opts = BOTCFG.landing) {
+    this.opts = opts; this.regs = opts.checkpoints.map(() => makeReg('landing'));
+    this.entries = []; this.version = 0; this.fitVersion = opts.checkpoints.map(() => -1);
+    this.cur = null; this.est = null; this.waiting = false; this.enabled = true; this.lowContext = false;
+    this.cov90 = new Coverage(); this.err = []; this.onFail = null; this.onOutput = null;
+  }
+  rows() { return this.entries.length; }
+  /** LandingEstimator.estimate(observation): the latest TabPFN estimate for the incoming shot, carried forward. */
+  estimate(o) { return this.est && o.incoming && this.est.shotId === o.incoming.shotId ? this.est : null; }
+  update(o) {
+    const inc = o.incoming;
+    if (!inc) return;
+    const cps = this.opts.checkpoints;
+    if (!this.cur || this.cur.shotId !== inc.shotId) {
+      const h = inc.hitter === o.me ? o.self : o.opponent;
+      this.cur = { shotId: inc.shotId, byBot: inc.hitter === o.me, type: inc.shotType, isServe: inc.isServe,
+                   p0: { x: h.x, y: h.y }, t: r4(o.t - inc.timeSinceHit), samples: [], botAt: [], asked: -1, estimates: [] };
+      this.est = null;
+    }
+    const c = this.cur;
+    c.samples = inc.samples.filter(s => s.t <= cps[cps.length - 1] + 1e-6);
+    cps.forEach((cp, k) => { if (!c.botAt[k] && inc.timeSinceHit >= cp - 1e-6) c.botAt[k] = { x: o.self.x, y: o.self.y }; });
+    if (c.byBot || !this.enabled || this.waiting) return;
+    let k = -1;
+    cps.forEach((cp, j) => { if (c.botAt[j] && LandingRows.row(c, j, cps, this.opts.shotCue)) k = j; });
+    if (k > c.asked) { c.asked = k; this.query(k); }
+  }
+  syncContext(k, items) {
+    if (this.fitVersion[k] === this.version) return;
+    this.fitVersion[k] = this.version;
+    this.regs[k].fit(items.map(z => z.x), { dx: items.map(z => z.y.dx), dy: items.map(z => z.y.dy), tr: items.map(z => z.y.tr) });
+  }
+  query(k) {
+    const cps = this.opts.checkpoints, cur = this.cur;
+    const items = LandingRows.table(this.entries, k, cps, this.opts.shotCue);
+    if (items.length < this.opts.minRows) { this.lowContext = true; return; }
+    this.lowContext = false;
+    this.syncContext(k, items);
+    const q = LandingRows.row(cur, k, cps, this.opts.shotCue);
+    this.waiting = true;
+    this.regs[k].predict([q.x]).then(out => {
+      this.waiting = false;
+      if (!Guard.check(out, 'landing')) return;
+      const dx = out.targets.dx[0], dy = out.targets.dy[0], tr = out.targets.tr[0];
+      const est = { shotId: cur.shotId, k, c: cps[k], mean: [r4(q.last.x + dx.mean), r4(q.last.y + dy.mean)],
+                    cov: [[dx.std * dx.std, 0], [0, dy.std * dy.std]], tArrival: r4(cps[k] + tr.mean), tArrivalSigma: tr.std,
+                    provenance: out.provenance, ms: out.ms };
+      cur.estimates.push(est);
+      if (this.cur === cur && (!this.est || this.est.k <= k)) this.est = est;   // carried forward to the next checkpoint
+      if (this.onOutput) this.onOutput('landing', est);
+    }, err => { this.waiting = false; if (err.deferred) return;   /* over the rate budget: carry the last estimate forward */ if (this.onFail) this.onFail(err); });
+  }
+  /** The shuttle came down: the landing becomes a context row (label) and scores calibration. */
+  onLanding(ll, prefit) {
+    const c = this.cur;
+    if (!c || c.shotId !== ll.shotId) return null;
+    const entry = { shotId: c.shotId, byBot: c.byBot, type: c.type, isServe: c.isServe, p0: c.p0, t: c.t,
+                    samples: c.samples, botAt: c.botAt, landing: { x: ll.x, y: ll.y }, tArrival: ll.tArrival };
+    const last = c.estimates[c.estimates.length - 1];
+    if (last) {
+      const dx = ll.x - last.mean[0], dy = ll.y - last.mean[1];
+      this.cov90.add(dx * dx / last.cov[0][0] + dy * dy / last.cov[1][1] <= 4.605);   // chi-square(2) 90 %
+      this.err.push(r4(hyp(dx, dy))); if (this.err.length > 30) this.err.shift();
+    }
+    if (!c.byBot) this.entries.push(entry);   // own shots fly at the human's slowed speed: not comparable
+    while (this.entries.length > this.opts.window) this.entries.shift();
+    this.version++;
+    if (prefit) this.opts.checkpoints.forEach((_, k) => {
+      const items = LandingRows.table(this.entries, k, this.opts.checkpoints, this.opts.shotCue);
+      if (items.length >= this.opts.minRows) this.syncContext(k, items);
+    });
+    return entry;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Dynamics model: [x, y, vx, vy, ux, uy, u_prev_x, u_prev_y] -> (dvx, dvy) per control step
+// ---------------------------------------------------------------------
+const DynRows = {
+  names: ['x', 'y', 'vx', 'vy', 'ux', 'uy', 'uPrevX', 'uPrevY'],
+  row: tr => [r4(tr.s.x), r4(tr.s.y), r4(tr.s.vx), r4(tr.s.vy), r4(tr.u[0]), r4(tr.u[1]), r4(tr.up[0]), r4(tr.up[1])],
+};
+
+class TabularDynamicsModel {
+  constructor(makeReg, opts = BOTCFG.dynamics) {
+    this.opts = opts; this.reg = makeReg('dynamics'); this.trans = []; this.newSinceFit = 0;
+    this.sur = null; this.waiting = false; this.retryAt = 0; this.lastRefresh = 0;
+    this.cov90 = new Coverage(); this.err = []; this.onFail = null;
+  }
+  rows() { return this.trans.length; }
+  ready() { return !!this.reg.ctx; }
+  addTransition(tr) {
+    const f = DynRows.row(tr), eps = this.opts.dedupEps;
+    for (let i = this.trans.length - 1; i >= Math.max(0, this.trans.length - 80); i--) {   // de-duplicate: keep the newer
+      const g = DynRows.row(this.trans[i]);
+      if (f.every((v, j) => Math.abs(v - g[j]) < eps)) { this.trans.splice(i, 1); break; }
+    }
+    this.trans.push(tr);
+    while (this.trans.length > this.opts.window || (this.trans.length && tr.t - this.trans[0].t > this.opts.windowSec)) this.trans.shift();
+    this.newSinceFit++;
+    this.maybeRefit();
+  }
+  maybeRefit(force) {
+    const n = this.trans.length;
+    if (n < this.opts.minRows || this.reg.pendingCtx) return;
+    if (!force && this.reg.ctx && this.newSinceFit < Math.max(5, this.opts.refitFrac * n)) return;
+    this.newSinceFit = 0;
+    this.reg.fit(this.trans.map(DynRows.row), { dvx: this.trans.map(t => r4(t.dv.x)), dvy: this.trans.map(t => r4(t.dv.y)) });
+  }
+  /** DynamicsModel.predict(batch of {s, u, up}) -> { meanDelta, std, provenance } */
+  async predict(batch) {
+    const out = await this.reg.predict(batch.map(DynRows.row));
+    return { meanDelta: out.targets.dvx.map((a, i) => [a.mean, out.targets.dvy[i].mean]),
+             std: out.targets.dvx.map((a, i) => [a.std, out.targets.dvy[i].std]), provenance: out.provenance, ms: out.ms };
+  }
+  /** One batched TabPFN call on a grid of velocities x commands -> a piecewise-linear surrogate built
+   *  purely from TabPFN's own predictions (provenance "tabpfn-linearized"). Rebuilt only when the
+   *  context has been refit, so the planner never waits on the network. */
+  buildSurrogate(vmax, pos) {
+    const o = this.opts, gv = gridAxis(o.gridV, -vmax, vmax), gu = gridAxis(o.gridU, -1, 1), batch = [];
+    for (const vx of gv) for (const vy of gv) for (const ux of gu) for (const uy of gu) {
+      const u = clipNorm([ux, uy]);
+      batch.push({ s: { x: pos.x, y: pos.y, vx, vy }, u: [r4(u[0]), r4(u[1])], up: [r4(u[0]), r4(u[1])] });
+    }
+    const version = this.reg.ctx.version;
+    this.waiting = true; this.lastRefresh = Clock.now();
+    return this.predict(batch, 'low').then(out => {
+      this.waiting = false;
+      const vals = out.meanDelta.map((m, i) => [m[0], m[1], out.std[i][0], out.std[i][1]]);
+      return { kind: 'grid', gv, gu, vals, ctxVersion: version, builtAt: Clock.now(), ms: out.ms,
+               provenance: out.provenance === 'tabpfn' ? 'tabpfn-linearized' : out.provenance };
+    }, err => { this.waiting = false; if (!err.deferred) this.retryAt = Clock.now() + this.opts.retryMs; throw err; });
+  }
+  needsRefresh() {
+    return this.ready() && !this.waiting && Clock.now() >= (this.retryAt || 0) &&
+      (!this.sur || (this.sur.ctxVersion !== this.reg.ctx.version && Clock.now() - (this.lastRefresh || 0) >= this.opts.minRefreshMs));
+  }
+}
+
+const gridAxis = (n, lo, hi) => Array.from({ length: n }, (_, i) => r4(lo + (hi - lo) * i / (n - 1)));
+function gridCell(g, x) {
+  const n = g.length, f = (Math.min(Math.max(x, g[0]), g[n - 1]) - g[0]) / (g[1] - g[0]), i = Math.min(n - 2, Math.floor(f));
+  return [i, f - i];
+}
+
+// ---------------------------------------------------------------------
+// MPC: rollouts under the TabPFN-derived dynamics with a Monte Carlo chance constraint
+// ---------------------------------------------------------------------
+const MPC = {
+  /** Velocity change over one control step and its TabPFN std: [dvx, dvy, sx, sy].
+   *  Grid surrogates (from TabPFN) are interpolated multilinearly in (vx, vy, ux, uy);
+   *  Jacobian-only step lists are used by the planner unit test. */
+  linStep(L, k, v, u, up) {
+    if (L.kind === 'grid') {
+      const c = clipNorm(u), nv = L.gv.length, nu = L.gu.length;
+      const [a, wa] = gridCell(L.gv, v[0]), [b, wb] = gridCell(L.gv, v[1]), [i, wi] = gridCell(L.gu, c[0]), [j, wj] = gridCell(L.gu, c[1]);
+      const out = [0, 0, 0, 0];
+      for (let da = 0; da < 2; da++) for (let db = 0; db < 2; db++) for (let di = 0; di < 2; di++) for (let dj = 0; dj < 2; dj++) {
+        const w = (da ? wa : 1 - wa) * (db ? wb : 1 - wb) * (di ? wi : 1 - wi) * (dj ? wj : 1 - wj);
+        if (w === 0) continue;
+        const val = L.vals[(((a + da) * nv + (b + db)) * nu + (i + di)) * nu + (j + dj)];
+        out[0] += w * val[0]; out[1] += w * val[1]; out[2] += w * val[2]; out[3] += w * val[3];
+      }
+      return out;
+    }
+    const n = L.steps[k];
+    if (!n) return null;
+    const J = n.J, dvx = v[0] - n.s.vx, dvy = v[1] - n.s.vy;
+    const a = [dvx, dvy, u[0] - n.u[0], u[1] - n.u[1], up[0] - n.up[0], up[1] - n.up[1]];
+    const o = i => n.f[i] + J.vx[i] * a[0] + J.vy[i] * a[1] + J.ux[i] * a[2] + J.uy[i] * a[3] + J.upx[i] * a[4] + J.upy[i] * a[5];
+    return [o(0), o(1), n.std[0], n.std[1]];
+  },
+  /** Cost of command sequence U over C.S rollouts: terminal distance at arrival, chance-constraint
+   *  shortfall of P(dist <= r) below p, control effort, recovery to base after arrival. */
+  evaluate(U, C, keepPath) {
+    let total = 0, hits = 0;
+    const path = keepPath ? [[C.s0.x, C.s0.y]] : null;
+    for (let s = 0; s < C.S; s++) {
+      let x = C.s0.x, y = C.s0.y, vx = C.s0.vx, vy = C.s0.vy, up = C.up0, cost = 0;
+      const L = C.landS ? C.landS[s] : null;
+      let done = !L, hit = !L, k = 0;
+      for (; k < C.H; k++) {
+        const u = U[k], m = C.step(C, k, [vx, vy], u, up, s);
+        if (!m) break;
+        const e = C.eps[s][k], sd = [m[2], m[3]];
+        let nvx = vx + m[0] + sd[0] * e[0], nvy = vy + m[1] + sd[1] * e[1];
+        const sp = hyp(nvx, nvy);
+        if (sp > C.vmax) { nvx *= C.vmax / sp; nvy *= C.vmax / sp; }
+        const nx = clamp(x + C.dt * (vx + nvx) / 2, C.bounds.x0, C.bounds.x1), ny = clamp(y + C.dt * (vy + nvy) / 2, C.bounds.y0, C.bounds.y1);
+        const t0 = k * C.dt;
+        if (!done && L.t <= t0 + C.dt) {
+          const a = clamp((L.t - t0) / C.dt, 0, 1), d = hyp(x + (nx - x) * a - L.x, y + (ny - y) * a - L.y);
+          cost += C.w.term * d * d; hit = d <= C.r; done = true;
+        } else if (done) cost += C.w.rec * C.dt * ((nx - C.base.x) ** 2 + (ny - C.base.y) ** 2);
+        cost += C.w.effort * C.dt * (u[0] * u[0] + u[1] * u[1]);
+        x = nx; y = ny; vx = nvx; vy = nvy; up = u;
+        if (path && s === 0) path.push([x, y]);
+      }
+      if (!done) {          // arrival beyond the horizon: the rest must be coverable at max speed
+        const d = Math.max(0, hyp(x - L.x, y - L.y) - C.vmax * Math.max(0, L.t - k * C.dt));
+        cost += C.w.term * d * d; hit = d <= C.r;
+      }
+      total += cost; if (hit) hits++;
+    }
+    const pHit = hits / C.S;
+    return { cost: total / C.S + (C.landS ? C.w.cc * Math.max(0, C.p - pHit) : 0), pHit, path };
+  },
+};
+
+/** Cross-entropy method over command sequences, warm-started from the shifted previous plan. */
+class CEMPlanner {
+  constructor(opts, rng) { this.o = opts; this.rng = rng; this.name = 'cem'; }
+  plan(C, warm) {
+    const { N, elites, iters, sigma0 } = this.o, H = C.H, g = () => RNG.gauss(this.rng);
+    let mu = (warm || []).slice(0, H).map(u => u.slice());
+    while (mu.length < H) mu.push(mu.length ? mu[mu.length - 1].slice() : [0, 0]);
+    let sig = mu.map(() => [sigma0, sigma0]), best = null, shown = [];
+    for (let it = 0; it < iters; it++) {
+      const last = it === iters - 1, cands = [mu.map(u => clipNorm(u.slice()))];
+      for (let i = 1; i < N; i++) cands.push(mu.map((m, k) => clipNorm([m[0] + sig[k][0] * g(), m[1] + sig[k][1] * g()])));
+      const scored = cands.map(U => ({ U, ...MPC.evaluate(U, C, last) })).sort((a, b) => a.cost - b.cost);
+      if (!best || scored[0].cost < best.cost) best = scored[0];
+      const el = scored.slice(0, elites);
+      mu = mu.map((_, k) => [mean(el.map(e => e.U[k][0])), mean(el.map(e => e.U[k][1]))]);
+      sig = mu.map((m, k) => [Math.max(0.05, Math.sqrt(mean(el.map(e => (e.U[k][0] - m[0]) ** 2)))),
+                              Math.max(0.05, Math.sqrt(mean(el.map(e => (e.U[k][1] - m[1]) ** 2))))]);
+      if (last) shown = scored.slice(0, 16).map(sc => sc.path);
+    }
+    if (!best.path) best = { ...best, ...MPC.evaluate(best.U, C, true) };
+    return { U: best.U, cost: best.cost, pHit: best.pHit, path: best.path, shown };
+  }
+}
+
+// ---------------------------------------------------------------------
+// Own-shot model (MPC over shot choice): [shot type, hitter, target, distance, time, recent miss]
+// -> landing minus target. Candidates are sampled at random and scored on TabPFN's predictions.
+// ---------------------------------------------------------------------
+const ShotRows = {
+  names: ['isServe', 'isClear', 'isDrop', 'isSmash', 'hitterX', 'hitterY', 'targetX', 'targetY', 'distance', 'gameTime', 'recentMissX', 'recentMissY'],
+  recent(list) {
+    const k = list.slice(-3);
+    return k.length ? [r4(mean(k.map(v => v.x))), r4(mean(k.map(v => v.y)))] : [0, 0];
+  },
+  row: (type, from, target, t, rec) => [...oneHot(type), r4(from.x), r4(from.y), r4(target.x), r4(target.y),
+    r4(hyp(target.x - from.x, target.y - from.y)), r4(t || 0), rec[0], rec[1]],
+  table(own) {
+    const items = [], res = [];
+    for (const r of own) {
+      const y = { x: r4(r.landing.x - r.target.x), y: r4(r.landing.y - r.target.y) };
+      items.push({ x: ShotRows.row(r.type, r.p0, r.target, r.t, ShotRows.recent(res)), y });
+      res.push(y);
+    }
+    return { items, recent: ShotRows.recent(res) };
+  },
+};
+
+class TabularShotModel {
+  constructor(makeReg, opts = BOTCFG.shot) {
+    this.opts = opts; this.reg = makeReg('shot'); this.own = []; this.version = 0; this.fitVersion = -1;
+    this.decision = null; this.waiting = false; this.lowContext = false; this.rng = { s: 0x51ed270b };
+    this.cov90 = new Coverage(); this.onFail = null; this.onOutput = null;
+  }
+  rows() { return this.own.length; }
+  add(rec) { this.own.push(rec); while (this.own.length > this.opts.window) this.own.shift(); this.version++; }
+  sync() {
+    if (this.fitVersion === this.version || this.own.length < this.opts.minRows) return;
+    this.fitVersion = this.version;
+    const t = ShotRows.table(this.own);
+    this.reg.fit(t.items.map(z => z.x), { dx: t.items.map(z => z.y.x), dy: t.items.map(z => z.y.y) });
+  }
+  start(o) {
+    const types = o.phase === 'serve' ? ['serve'] : RALLY_SHOTS, from = { x: o.self.x, y: o.self.y }, cands = [], u = () => RNG.next(this.rng);
+    for (const type of types) {
+      const z = o.validZones[type], n = type === 'serve' ? this.opts.serveCandidates : this.opts.candidatesPerType;
+      for (let i = 0; i < n; i++) cands.push({ type, from, target: { x: r4(z.x0 + (z.x1 - z.x0) * u()), y: r4(z.y0 + (z.y1 - z.y0) * u()) } });
+    }
+    const d = this.decision = { cands, start: o.t, ready: false, committed: false, chosen: null, explore: u() < this.opts.epsilon };
+    if (this.own.length < this.opts.minRows) { this.lowContext = true; return; }   // no TabPFN prediction: game rule auto-plays at timeout
+    this.lowContext = false;
+    this.sync();
+    const tab = ShotRows.table(this.own);
+    this.waiting = true;
+    this.reg.predict(cands.map(c => ShotRows.row(c.type, c.from, c.target, o.t, tab.recent)), 'high').then(out => {
+      this.waiting = false;
+      if (!Guard.check(out, 'shot') || this.decision !== d || d.committed) return;
+      cands.forEach((c, i) => Object.assign(c, { mx: c.target.x + out.targets.dx[i].mean, my: c.target.y + out.targets.dy[i].mean,
+                                                 sx: out.targets.dx[i].std, sy: out.targets.dy[i].std }));
+      for (const c of cands) this.score(c, o);
+      const sorted = cands.slice().sort((a, b) => b.score - a.score), safe = sorted.filter(c => c.pIn > 0.6);
+      d.chosen = d.explore && safe.length ? safe[Math.floor(u() * safe.length)] : sorted[0];
+      d.ready = true; d.provenance = out.provenance;
+      if (this.onOutput) this.onOutput('shot', { chosen: d.chosen, provenance: out.provenance });
+    }, err => { this.waiting = false; if (!err.deferred && this.onFail) this.onFail(err); });
+  }
+  /** Score = P(lands in) x P(opponent can't reach). Both from TabPFN's predicted landing distribution
+   *  plus court geometry and the opponent's speed limit (no other model). */
+  score(c, o) {
+    const C = o.params.court, side = o.side, opp = o.opponent;
+    const zone = c.type === 'serve' ? o.validZones.serve
+      : { x0: -C.singlesHalfW, x1: C.singlesHalfW, y0: side > 0 ? -C.halfLen : 0, y1: side > 0 ? 0 : C.halfLen };
+    const sp = o.params.shotTiming[c.type];
+    const T = (sp.baseTime + sp.perMeter * hyp(c.target.x - c.from.x, c.target.y - c.from.y)) * (o.params.oppReceiveTimeScale || 1);
+    const margin = hyp(opp.x - c.mx, opp.y - c.my) - o.params.reach - o.params.maxSpeed * Math.max(0, T - 0.25);
+    c.pIn = probInRect(c.mx, c.sx, c.my, c.sy, zone);
+    c.pFail = 1 / (1 + Math.exp(-margin / 0.4));
+    c.score = c.pIn * c.pFail;
+  }
+  /** Calibration: did the bot's own committed shot land inside TabPFN's predicted 90 % ellipse? */
+  scoreCommitted(landing) {
+    const c = this.committed;
+    this.committed = null;
+    if (!c || c.sx == null) return;
+    const dx = landing.x - c.mx, dy = landing.y - c.my;
+    this.cov90.add(dx * dx / (c.sx * c.sx) + dy * dy / (c.sy * c.sy) <= 4.605);
+  }
+}
+
+/** Warm-up exploration controller: random piecewise-constant commands (not a predictor). */
+class Explorer {
+  constructor(seed) { this.rng = { s: seed >>> 0 }; this.u = [0, 0]; this.until = -1; }
+  command(o) {
+    if (o.t >= this.until) {
+      const r = () => RNG.next(this.rng), home = { x: 0, y: o.side * 3.5 };
+      const far = Math.abs(o.self.x) > 2 || Math.abs(o.self.y - home.y) > 2.2;
+      if (far && r() < 0.7) { const dx = home.x - o.self.x, dy = home.y - o.self.y, L = hyp(dx, dy) || 1; this.u = [dx / L, dy / L]; }
+      else if (r() < 0.2) this.u = [0, 0];
+      else {                                       // commands ~uniform over the disk |u| <= 1
+        const a = r() * 2 * Math.PI, m = Math.min(1, 1.15 * Math.sqrt(r()));
+        this.u = [r4(m * Math.cos(a)), r4(m * Math.sin(a))];
+      }
+      this.until = o.t + 0.1 + 0.3 * r();          // frequent switches: covers u != u_prev (command lag)
+    }
+    return this.u;
+  }
+  hit(o) {
+    const r = () => RNG.next(this.rng), types = o.phase === 'serve' ? ['serve'] : RALLY_SHOTS;
+    const type = types[Math.floor(r() * types.length)], z = o.validZones[type];
+    return { target: { x: r4(z.x0 + (z.x1 - z.x0) * r()), y: r4(z.y0 + (z.y1 - z.y0) * r()) }, shotType: type };
+  }
+}
+
+// ---------------------------------------------------------------------
+// BotController (Controller interface: observe(obs) + synchronous act()). Network calls are
+// asynchronous; act() never waits. Degraded mode never substitutes another predictor:
+// late -> shifted previous TabPFN plan, then brake (zero command), then the App pauses the rally.
+// ---------------------------------------------------------------------
+class BotController {
+  constructor(opts = {}) {
+    const mk = opts.makeRegressor;
+    this.landing = opts.landing || new TabularLandingEstimator(mk);
+    this.dynamics = opts.dynamics || new TabularDynamicsModel(mk);
+    this.shots = opts.shots || new TabularShotModel(mk);
+    this.planner = opts.planner || new CEMPlanner(BOTCFG.mpc, { s: 0x2545f491 });
+    this.explorer = new Explorer(0x1234567);
+    this.storageKey = opts.storageKey === undefined ? BOTCFG.storageKey : opts.storageKey;
+    this.mode = 'play';                          // 'warmup' | 'play'
+    this.stats = { late: 0, failed: 0, refused: 0 };
+    this.providerLog = [];                       // every provider output used, for the replay log / export
+    const fail = () => { this.stats.failed++; };
+    this.landing.onFail = this.dynamics.onFail = this.shots.onFail = fail;
+    this.landing.onOutput = this.shots.onOutput = (task, out) => this.logOutput(task, out);
+    this.rng = { s: 0x9e3779b9 };
+    this.load();
+    this.reset();
+  }
+  reset() {
+    this.obs = null; this.cmd = { x: 0, y: 0 }; this.lastU = [0, 0]; this.plan = null; this.prevCtrl = null;
+    this.wasMustHit = false; this.lastLandingId = null; this.status = 'idle'; this.lateFlag = false;
+    this.latSim = 0; this.warmHit = null; this.strictPending = false;
+  }
+  setMode(m) { this.mode = m; this.landing.enabled = m === 'play'; }
+  logOutput(task, out) {
+    this.providerLog.push({ t: this.obs ? this.obs.t : null, task, provenance: out.provenance, out });
+    if (this.providerLog.length > 2000) this.providerLog.shift();
+  }
+  isBusy() { return this.landing.waiting || this.dynamics.waiting || this.shots.waiting; }
+  /** Pending TabPFN work that matters right now (opponent shot in flight, or the bot must hit). */
+  isCritical() {
+    const o = this.obs;
+    return !!o && this.mode === 'play' && this.isBusy() && ((o.incoming && o.incoming.hitter !== o.me) || o.mustHit);
+  }
+  contextSizes() { return { landing: this.landing.rows(), dynamics: this.dynamics.rows(), shot: this.shots.rows() }; }
+  lowContext() {
+    const c = this.contextSizes(), L = BOTCFG.lowContext;
+    return c.landing < L.landing || c.dynamics < L.dynamics || c.shot < L.shot;
+  }
+  hasValidStoredContext() { return !this.lowContext(); }
+
+  observe(o) {
+    this.obs = o;
+    const ll = o.lastLanding;
+    if (ll && ll.shotId !== this.lastLandingId) { this.lastLandingId = ll.shotId; this.onLanding(ll); }
+    this.landing.update(o);
+    if (o.mustHit && !this.wasMustHit) this.startHit(o);
+    this.wasMustHit = o.mustHit;
+    const tick = Math.round(o.t / DT);
+    if (tick % BOTCFG.mpc.ctrlTicks === 0) this.controlTick(o, tick);
+  }
+
+  onLanding(ll) {
+    const o = this.obs;
+    const oppNext = this.mode === 'play' && (ll.hitter === o.me ? ll.outcome !== 'winner' : ll.outcome === 'winner');
+    const entry = this.landing.onLanding(ll, oppNext);
+    if (entry && ll.hitter === o.me && ll.target) {
+      this.shots.scoreCommitted(ll);
+      this.shots.add({ shotId: ll.shotId, type: ll.shotType, p0: entry.p0, target: ll.target, landing: { x: ll.x, y: ll.y }, t: entry.t });
+      if (this.mode === 'play') this.shots.sync();
+    }
+    this.save();
+  }
+
+  startHit(o) {
+    if (this.mode === 'warmup') { this.warmHit = { at: o.t + 0.3, hit: this.explorer.hit(o) }; return; }
+    this.shots.start(o);
+  }
+
+  controlTick(o, tick) {
+    const s = { x: o.self.x, y: o.self.y, vx: o.self.vx, vy: o.self.vy };
+    const locked = o.phase === 'serve' || o.phase === 'over' || o.phase === 'practiceDone' || (o.phase === 'aim' && o.mustHit);
+    const p = this.prevCtrl;
+    if (p && !p.locked && !locked && !p.recovering && !o.self.recovering && tick - p.tick === BOTCFG.mpc.ctrlTicks) {
+      const dv = { x: r4(s.vx - p.s.vx), y: r4(s.vy - p.s.vy) };
+      if (p.pred) {                                   // calibration of the dynamics model's 90 % interval
+        const z = 1.645;
+        this.dynamics.cov90.add(Math.abs(dv.x - p.pred.m[0]) <= z * p.pred.sd[0]);
+        this.dynamics.cov90.add(Math.abs(dv.y - p.pred.m[1]) <= z * p.pred.sd[1]);
+        this.dynamics.err.push(r4(hyp(dv.x - p.pred.m[0], dv.y - p.pred.m[1]))); if (this.dynamics.err.length > 60) this.dynamics.err.shift();
+      }
+      this.dynamics.addTransition({ t: o.t, s: p.s, u: p.u, up: p.up, dv });
+    }
+    let u = [0, 0];
+    if (!locked) u = this.mode === 'warmup' ? this.explorer.command(o) : this.mpcCommand(o, s);
+    else this.plan = null;
+    const up = this.lastU;
+    const sur = this.dynamics.sur, m = sur && !locked ? MPC.linStep(sur, 0, [s.vx, s.vy], u, up) : null;
+    this.prevCtrl = { tick, s, u, up, locked, recovering: o.self.recovering, pred: m ? { m, sd: [m[2], m[3]] } : null };
+    this.lastU = u; this.cmd = { x: u[0], y: u[1] };
+  }
+
+  mpcCommand(o, s) {
+    const M = BOTCFG.mpc, est = this.landing.estimate(o), D = this.dynamics;
+    this.maybeRefreshSurrogate(o);
+    const sur = D.sur;
+    if (!sur) { this.status = 'waiting'; this.plan = null; return [0, 0]; }        // no TabPFN-derived model yet: brake
+    if (Clock.now() - sur.builtAt <= D.opts.ttlMs || D.sur.ctxVersion === (D.reg.ctx && D.reg.ctx.version)) {
+      if (!M.linearize) return this.strictCommand(o, s, est);
+      const t0 = Clock.now(), C = this.buildCtx(o, s, est, sur);
+      const warm = this.plan ? this.plan.U.slice(Math.max(0, Math.round((o.t - this.plan.t0) / M.dt))) : null;
+      const r = this.planner.plan(C, warm);
+      this.replanMs = Clock.now() - t0;
+      this.plan = { U: r.U, t0: o.t, pHit: est ? r.pHit : null, path: r.path, shown: r.shown, est };
+      this.status = 'ok'; this.lateFlag = false;
+      return r.U[0];
+    }
+    return this.followOrBrake(o);
+  }
+
+  /** Late: follow the shifted previous TabPFN-derived plan; when it runs out, brake (zero command). */
+  followOrBrake(o) {
+    if (this.plan) {
+      const j = Math.round((o.t - this.plan.t0) / BOTCFG.mpc.dt);
+      if (j < this.plan.U.length) {
+        if (!this.lateFlag) { this.stats.late++; this.lateFlag = true; }
+        this.status = 'late';
+        return this.plan.U[j];
+      }
+    }
+    this.status = 'waiting';
+    return [0, 0];
+  }
+
+  /** Rebuild the TabPFN dynamics surrogate after the context was refit (rate-limited, never blocks). */
+  maybeRefreshSurrogate(o) {
+    const D = this.dynamics;
+    if (!D.needsRefresh()) return;
+    D.buildSurrogate(o.params.maxSpeed, { x: 0, y: o.side * 3.3 }).then(sur => {
+      if (!Guard.check(sur, 'dynamics')) return;
+      D.sur = sur;
+      this.logOutput('dynamics', { provenance: sur.provenance, ms: sur.ms, rows: sur.vals.length, ctxVersion: sur.ctxVersion });
+    }, err => { if (!err.deferred) this.stats.failed++; });
+  }
+
+  /** Strict mode: exact per-step TabPFN rollouts (H sequential batched calls), random-shooting candidates.
+   *  While a strict plan is being computed the bot follows its previous plan, then brakes. */
+  strictCommand(o, s, est) {
+    if (!this.strictPending) {
+      this.strictPending = true;
+      const M = BOTCFG.mpc, C = this.buildCtx(o, s, est, this.dynamics.sur), g = () => RNG.gauss(this.rng), N = M.strictN;
+      const warm = this.plan ? this.plan.U.slice(Math.max(0, Math.round((o.t - this.plan.t0) / M.dt))) : [];
+      while (warm.length < C.H) warm.push(warm.length ? warm[warm.length - 1] : [0, 0]);
+      const cands = [warm.slice(0, C.H)];
+      for (let i = 1; i < N; i++) cands.push(warm.slice(0, C.H).map(u => clipNorm([u[0] + 0.6 * g(), u[1] + 0.6 * g()])));
+      const t0 = o.t;
+      (async () => {
+        let st = cands.flatMap(U => Array.from({ length: C.S }, () => ({ x: s.x, y: s.y, vx: s.vx, vy: s.vy })));
+        const deltas = cands.map(() => Array.from({ length: C.S }, () => []));
+        for (let k = 0; k < C.H; k++) {
+          const batch = st.map((q, idx) => { const ci = Math.floor(idx / C.S); return { s: q, u: cands[ci][k], up: k ? cands[ci][k - 1] : C.up0 }; });
+          const out = await this.dynamics.predict(batch);
+          if (!Guard.check(out, 'dynamics')) throw new Error('refused');
+          st = st.map((q, idx) => {
+            const ci = Math.floor(idx / C.S), si = idx % C.S, e = C.eps[si][k];
+            const d = [out.meanDelta[idx][0] + out.std[idx][0] * e[0], out.meanDelta[idx][1] + out.std[idx][1] * e[1]];
+            deltas[ci][si].push(d);
+            const nvx = q.vx + d[0], nvy = q.vy + d[1];
+            return { x: q.x + M.dt * (q.vx + nvx) / 2, y: q.y + M.dt * (q.vy + nvy) / 2, vx: nvx, vy: nvy };
+          });
+        }
+        const zeroEps = C.eps.map(r => r.map(() => [0, 0]));
+        const scored = cands.map((U, ci) => ({ U, ...MPC.evaluate(U, { ...C, eps: zeroEps,
+          step: (CC, k, v, u, up, si) => { const d = deltas[ci][si][k]; return d ? [d[0], d[1], 0, 0] : null; } }, true) }));
+        scored.sort((a, b) => a.cost - b.cost);
+        this.plan = { U: scored[0].U, t0, pHit: est ? scored[0].pHit : null, path: scored[0].path, shown: scored.slice(0, 12).map(x => x.path), est };
+        this.lateFlag = false;
+      })().catch(() => { this.stats.failed++; }).finally(() => { this.strictPending = false; });
+    }
+    return this.followOrBrake(o);
+  }
+
+  buildCtx(o, s, est, sur) {
+    const M = BOTCFG.mpc, C0 = o.params.court, side = o.side, g = () => RNG.gauss(this.rng);
+    let H = M.H, landS = null;
+    if (est && o.incoming) {
+      const tRem = est.tArrival - o.incoming.timeSinceHit, sx = Math.sqrt(est.cov[0][0]), sy = Math.sqrt(est.cov[1][1]);
+      landS = [];
+      for (let i = 0; i < M.S; i++) landS.push({ x: est.mean[0] + sx * g(), y: est.mean[1] + sy * g(), t: Math.max(M.dt / 2, tRem + est.tArrivalSigma * g()) });
+      H = Math.min(H, Math.ceil(Math.max(...landS.map(l => l.t)) / M.dt) + 3);   // horizon tied to the remaining flight time
+    }
+    const eps = [];
+    for (let i = 0; i < M.S; i++) { const row = []; for (let k = 0; k < H; k++) row.push([g(), g()]); eps.push(row); }
+    // Latency compensation: plan from the state predicted forward (TabPFN surrogate) by the last replan time.
+    let s0 = s;
+    const lagSteps = Math.round((this.latSim || 0) / M.dt);
+    for (let k = 0; k < lagSteps && sur; k++) {
+      const m = MPC.linStep(sur, 0, [s0.vx, s0.vy], this.lastU, this.lastU), nvx = s0.vx + m[0], nvy = s0.vy + m[1];
+      s0 = { x: s0.x + M.dt * (s0.vx + nvx) / 2, y: s0.y + M.dt * (s0.vy + nvy) / 2, vx: nvx, vy: nvy };
+    }
+    return {
+      s0, up0: this.lastU, H, dt: M.dt, S: M.S, eps, landS, p: M.p, w: M.w, r: o.params.reach, vmax: o.params.maxSpeed,
+      base: { x: 0, y: side * 3.3 },
+      bounds: { x0: -C0.singlesHalfW - 0.8, x1: C0.singlesHalfW + 0.8, y0: side > 0 ? 0.3 : -C0.halfLen - 0.8, y1: side > 0 ? C0.halfLen + 0.8 : -0.3 },
+      step: (C, k, v, u, up) => MPC.linStep(sur, k, v, u, up),
+    };
+  }
+
+  act() {
+    const o = this.obs;
+    if (!o) return { move: { x: 0, y: 0 } };
+    const out = { move: this.cmd };
+    if (o.mustHit) {
+      if (this.mode === 'warmup') {
+        if (this.warmHit) { out.aim = this.warmHit.hit; if (o.t >= this.warmHit.at) { out.hit = this.warmHit.hit; this.warmHit = null; } }
+      } else {
+        const d = this.shots.decision;
+        if (d && d.chosen && !d.committed) {
+          out.aim = { target: d.chosen.target, shotType: d.chosen.type };
+          if (d.ready && o.t - d.start >= 0.15) { out.hit = out.aim; d.committed = true; this.shots.committed = d.chosen; }
+        }
+      }
+    }
+    return out;
+  }
+
+  // Persistence of the TabPFN contexts (rows only; never any secret).
+  save() {
+    if (!this.storageKey) return;
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify({ v: 1, landing: this.landing.entries, dynamics: this.dynamics.trans, shot: this.shots.own }));
+    } catch (e) { /* storage unavailable */ }
+  }
+  load() {
+    if (!this.storageKey) return;
+    try {
+      const j = JSON.parse(localStorage.getItem(this.storageKey) || 'null');
+      if (!j || j.v !== 1) return;
+      this.landing.entries = j.landing || []; this.landing.version++;
+      this.dynamics.trans = j.dynamics || []; this.dynamics.newSinceFit = this.dynamics.trans.length;
+      this.shots.own = j.shot || []; this.shots.version++;
+    } catch (e) { /* storage unavailable */ }
+  }
+  clearMemory() {
+    this.landing.entries = []; this.landing.version++; this.dynamics.trans = []; this.dynamics.sur = null; this.shots.own = []; this.shots.version++;
+    try { localStorage.removeItem(this.storageKey); } catch (e) { /* ignore */ }
+  }
+  /** Fit all contexts now (after warm-up / a stored context), so the first rally does not wait. */
+  prefitAll() {
+    this.dynamics.maybeRefit(true);
+    this.dynamics.sur = null;
+    this.shots.sync();
+    BOTCFG.landing.checkpoints.forEach((_, k) => {
+      const items = LandingRows.table(this.landing.entries, k, BOTCFG.landing.checkpoints, BOTCFG.landing.shotCue);
+      if (items.length >= BOTCFG.landing.minRows) this.landing.syncContext(k, items);
+    });
+  }
+}
+
+function sanitizeAction(a) {
+  const num = v => (Number.isFinite(v) ? v : 0);
+  const shot = h => (h && h.target && Number.isFinite(h.target.x) && Number.isFinite(h.target.y))
+    ? { target: { x: h.target.x, y: h.target.y }, shotType: SHOT_KINDS.includes(h.shotType) ? h.shotType : 'clear' } : null;
+  return {
+    move: { x: clamp(num(a && a.move && a.move.x), -1, 1), y: clamp(num(a && a.move && a.move.y), -1, 1) },
+    hit: shot(a && a.hit), aim: shot(a && a.aim),
+  };
+}
+
+// =====================================================================
+// SHOT LOGGER: one record per shot. Downloadable as CSV / JSON.
+// PHASE 2: these rows are the in-context training table for TabPFN
+// (features: shot type, target, hitter pos, early observed samples, wind
+// regime; label: trueLanding). The bot appends its own rallies here as well.
+// =====================================================================
+const LOG_COLUMNS = ['matchId', 'matchSeed', 'shotId', 'rallyId', 'shotIdx', 'tick', 'time', 'hitter', 'shotType', 'isServe',
+  'targetX', 'targetY', 'hitterX', 'hitterY', 'receiverX', 'receiverY', 'flightTime',
+  'windAtHitX', 'windAtHitY', 'meanWindX', 'meanWindY', 'driftX', 'driftY', 'noiseX', 'noiseY',
+  'trueLandingX', 'trueLandingY', 'inBounds', 'validServe', 'reached', 'receiverDist', 'receiverAtArrivalX', 'receiverAtArrivalY',
+  'rallyWinner', 'rallyReason', 'hitterWonRally', 'gameIdx', 'scoreHitter', 'scoreReceiver',
+  'windStrength', 'noiseMult', 'reach', 'playerSpeed', 'practice', 'courtSlippery', 'flightTimeScale', 'nSamples', 'samples'];
+
+class ShotLogger {
+  constructor() { this.records = []; }
+  add(rec) { this.records.push(rec); return this.records.length - 1; }
+  update(i, fields) { Object.assign(this.records[i], fields); }
+  finishRally(matchId, rallyId, winner, reason) {
+    for (let k = this.records.length - 1; k >= 0; k--) {
+      const r = this.records[k];
+      if (r.matchId !== matchId || r.rallyId !== rallyId) break;
+      r.rallyWinner = 'P' + (winner + 1); r.rallyReason = reason; r.hitterWonRally = r.hitter === 'P' + (winner + 1);
+    }
+  }
+  toJSON() { return JSON.stringify(this.records, null, 1); }
+  toCSV() {
+    const esc = v => {
+      if (v === null || v === undefined) return '';
+      const s = String(v);
+      return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const rows = [LOG_COLUMNS.join(',')];
+    for (const r of this.records) {
+      const flat = { ...r, nSamples: r.samples.length, samples: r.samples.map(s => `${s.t}:${s.x}:${s.y}:${s.z}`).join(';') };
+      rows.push(LOG_COLUMNS.map(c => esc(flat[c])).join(','));
+    }
+    return rows.join('\n');
+  }
+}
+
+// =====================================================================
+// SIM: the whole game state `S` is plain JSON data, so snapshot = clone.
+// Sim.step advances exactly one fixed tick. It is deterministic given the
+// seed and the controllers' actions.
+// =====================================================================
+const Sim = {
+  create(seed, bestOf, cfg, matchId) {
+    const seedInt = RNG.hash(String(seed));
+    const mk = side => ({ x: 0, y: side * 4, vx: 0, vy: 0, side, recover: 0 });
+    const S = {
+      matchId, seed: String(seed), tick: 0, cfg: clone(cfg), pendingCfg: clone(cfg),
+      rng: { shot: RNG.stream(seedInt, 'shot'), obs: RNG.stream(seedInt, 'obs') },
+      wind: Wind.makeParams(seedInt), rules: Rules.newMatch(bestOf),
+      players: [mk(1), mk(-1)], phase: 'serve', phaseEndTick: 0, resumeTick: 0,
+      shot: null, aim: null, lastAim: [null, null], rallyId: 0, shotInRally: 0, lastPoint: null, events: [],
+      shotSeq: 0, lastLanding: null,
+      env: { slippery: false, grip: 1, speedMult: 1 }, practice: null,
+    };
+    Sim.setupServe(S);
+    return S;
+  },
+  snapshot(S) { return clone(S); },
+  restore(snap) { return clone(snap); },
+  someoneMustHit(S) { return S.phase === 'serve' || S.phase === 'aim'; },
+  envFor(cmd) { return cmd.slippery ? { slippery: true, grip: COURT_CHANGE.grip, speedMult: COURT_CHANGE.speedMult } : { slippery: false, grip: 1, speedMult: 1 }; },
+
+  /** M3 warm-up: a seeded machine on P1's side fires shots into the bot's half, interleaved with
+   *  bot practice hits (seq: 0 = machine shot, 1 = bot hit). No scoring. The bot is P2. */
+  createPractice(seed, cfg, matchId, nMachine, nBot) {
+    const S = Sim.create(seed, 1, cfg, matchId);
+    S.events = [];
+    const seq = []; let m = nMachine, b = nBot;
+    while (m > 0 || b > 0) { for (let j = 0; j < 2 && m > 0; j++) { seq.push(0); m--; } if (b > 0) { seq.push(1); b--; } }
+    S.practice = { seq, done: 0, nextTick: S.tick + Math.round(0.8 / DT), rng: RNG.stream(RNG.hash(String(seed)), 'practice') };
+    S.phase = 'practice';
+    Object.assign(S.players[0], { x: 0, y: 4, vx: 0, vy: 0 });
+    Object.assign(S.players[1], { x: 0, y: -3.3, vx: 0, vy: 0 });
+    return S;
+  },
+  practiceNext(S, logger) {
+    const P = S.practice;
+    if (S.tick < P.nextTick) return;
+    if (P.done >= P.seq.length) { S.phase = 'practiceDone'; S.events.push({ type: 'practiceDone' }); return; }
+    const u = () => RNG.next(P.rng);
+    if (P.seq[P.done] === 0) {
+      const m = S.players[0];
+      Object.assign(m, { x: r4(-2 + 4 * u()), y: r4(m.side * (2.5 + 3.5 * u())), vx: 0, vy: 0 });
+      const type = ['clear', 'clear', 'drop', 'smash'][Math.floor(u() * 4)];
+      const zone = Rules.zoneFor(S.rules, m.side, type, S.cfg);
+      Sim.launch(S, 0, type, { x: r4(zone.x0 + (zone.x1 - zone.x0) * u()), y: r4(zone.y0 + (zone.y1 - zone.y0) * u()) }, logger, false);
+    } else {
+      S.phase = 'aim'; S.aim = { player: 1, startTick: S.tick, endTick: S.tick + Math.round(S.cfg.aimTime / DT) }; S.lastAim[1] = null;
+    }
+  },
+  hitterNow(S) { return S.phase === 'serve' ? S.rules.server : S.phase === 'aim' ? S.aim.player : -1; },
+
+  setupServe(S) {
+    S.cfg = clone(S.pendingCfg);                       // settings take effect at rally start
+    const R = S.rules, sv = R.server, rc = 1 - sv, xs = Rules.serverCourtSign(R);
+    for (const i of [0, 1]) S.players[i] = { ...S.players[i], side: R.ends[i], vx: 0, vy: 0, recover: 0 };
+    Object.assign(S.players[sv], { x: xs * 0.75, y: R.ends[sv] * 2.6 });
+    Object.assign(S.players[rc], { x: -xs * 0.75, y: R.ends[rc] * 3.3 });
+    S.phase = 'serve'; S.phaseEndTick = S.tick + Math.round(S.cfg.serveAimTime / DT);
+    S.shot = null; S.aim = null; S.lastAim = [null, null]; S.shotInRally = 0;
+    S.events.push({ type: 'rallyStart', rallyId: S.rallyId });
+  },
+
+  step(S, ctrls, logger, envCmd) {
+    if (envCmd) S.env = Sim.envFor(envCmd);              // court change (recorded with the actions)
+    const obs = [Observation.build(S, 0), Observation.build(S, 1)];
+    ctrls[0].observe(obs[0]); ctrls[1].observe(obs[1]);
+    const acts = [sanitizeAction(ctrls[0].act()), sanitizeAction(ctrls[1].act())];
+    for (const i of [0, 1]) if (obs[i].mustHit && acts[i].aim) S.lastAim[i] = acts[i].aim;
+
+    for (const i of [0, 1]) {
+      const locked = S.phase === 'serve' || S.phase === 'over' || S.phase === 'practiceDone' ||
+        (S.phase === 'aim' && S.aim.player === i) || (S.practice && i === 0);
+      S.players[i] = Physics.stepPlayer(S.players[i], acts[i].move, DT, S.cfg, locked, S.env);
+    }
+
+    switch (S.phase) {
+      case 'serve': {
+        const sv = S.rules.server, box = Rules.serviceBox(S.rules);
+        const choice = acts[sv].hit || (S.tick >= S.phaseEndTick ? (S.lastAim[sv] || { target: Rules.center(box) }) : null);
+        if (choice) Sim.launch(S, sv, 'serve', Rules.clampTo(choice.target, box), logger, true);
+        break;
+      }
+      case 'flight': {
+        const el = S.tick - S.shot.startTick;
+        const every = Math.max(1, Math.round(S.cfg.obsInterval / DT));
+        if (el * DT >= S.shot.plan.T) Sim.arrive(S, logger);
+        else if (el % every === 0) Sim.sample(S);
+        break;
+      }
+      case 'aim': {
+        // PHASE 2: S.aim.endTick is the bot's time budget for the MPC candidate search.
+        const i = S.aim.player;
+        const choice = acts[i].hit || (S.tick >= S.aim.endTick ? (S.lastAim[i] || { target: null, shotType: 'clear' }) : null);
+        if (choice) {
+          const type = RALLY_SHOTS.includes(choice.shotType) ? choice.shotType : 'clear';
+          const zone = Rules.zoneFor(S.rules, S.players[i].side, type, S.cfg);
+          const tgt = choice.target ? Rules.clampTo(choice.target, zone)
+            : (type === 'clear' ? { x: 0, y: -S.players[i].side * 5.5 } : Rules.center(zone));
+          Sim.launch(S, i, type, tgt, logger, false);
+        }
+        break;
+      }
+      case 'practice':
+        Sim.practiceNext(S, logger);
+        break;
+      case 'dead':
+        if (S.tick >= S.resumeTick) {
+          if (S.rules.over) { S.phase = 'over'; S.events.push({ type: 'matchOver', winner: S.rules.matchWinner }); }
+          else Sim.setupServe(S);
+        }
+        break;
+    }
+    S.tick++;
+    if (envCmd) acts.env = envCmd;
+    return acts;
+  },
+
+  launch(S, hitter, type, target, logger, isServe) {
+    const p = S.players[hitter], rc = S.players[1 - hitter], cfg = S.cfg;
+    const plan = Physics.plan({ from: { x: p.x, y: p.y }, target, type, t0: S.tick * DT }, S.wind, cfg, S.rng.shot);
+    const timeScale = cfg.slowShotsTo === 1 - hitter && cfg.botShotSlowdown > 1 ? cfg.botShotSlowdown : 1;
+    if (timeScale !== 1) { plan.T *= timeScale; plan.timeScale = timeScale; }   // give the human time to react
+    const shotId = ++S.shotSeq;
+    const rec = {
+      matchId: S.matchId, matchSeed: S.seed, shotId, rallyId: S.rallyId, shotIdx: S.shotInRally++, tick: S.tick, time: r4(S.tick * DT),
+      hitter: 'P' + (hitter + 1), shotType: type, isServe,
+      targetX: r4(target.x), targetY: r4(target.y), hitterX: r4(p.x), hitterY: r4(p.y), receiverX: r4(rc.x), receiverY: r4(rc.y),
+      flightTime: r4(plan.T), flightTimeScale: plan.timeScale || 1, windAtHitX: r4(plan.windAtHit.x), windAtHitY: r4(plan.windAtHit.y),
+      meanWindX: r4(plan.meanWind.x), meanWindY: r4(plan.meanWind.y), driftX: r4(plan.drift.x), driftY: r4(plan.drift.y),
+      noiseX: r4(plan.noise.x), noiseY: r4(plan.noise.y), trueLandingX: r4(plan.landing.x), trueLandingY: r4(plan.landing.y),
+      inBounds: null, validServe: null, reached: null, receiverDist: null, receiverAtArrivalX: null, receiverAtArrivalY: null,
+      rallyWinner: null, rallyReason: null, hitterWonRally: null,
+      gameIdx: S.rules.gameIdx, scoreHitter: S.rules.scores[hitter], scoreReceiver: S.rules.scores[1 - hitter],
+      windStrength: cfg.windStrength, noiseMult: cfg.noiseMult, reach: cfg.reach, playerSpeed: cfg.playerSpeed,
+      practice: !!S.practice, courtSlippery: S.env.slippery,
+      samples: [],
+    };
+    const recIdx = logger.add(rec);
+    S.shot = { id: shotId, hitter, receiver: 1 - hitter, type, isServe, plan, startTick: S.tick, samples: [], recIdx };
+    S.players[hitter] = { ...p, recover: Math.round(cfg.recoveryTime / DT) };
+    S.phase = 'flight'; S.aim = null;
+    Sim.sample(S);                                      // sample at t = 0
+  },
+
+  /** Noisy observation of the true shuttle position. PHASE 2: these are the bot's inputs. */
+  sample(S) {
+    const t = (S.tick - S.shot.startTick) * DT, pos = Physics.shuttleAt(S.shot.plan, t), g = S.rng.obs, c = S.cfg;
+    S.shot.samples.push({
+      t: r4(t), x: r4(pos.x + RNG.gauss(g) * c.obsNoiseXY), y: r4(pos.y + RNG.gauss(g) * c.obsNoiseXY),
+      z: r4(Math.max(0, pos.z + RNG.gauss(g) * c.obsNoiseZ)),
+    });
+  },
+
+  arrive(S, logger) {
+    const sh = S.shot, L = sh.plan.landing, rcv = S.players[sh.receiver];
+    const dist = hyp(rcv.x - L.x, rcv.y - L.y), reached = dist <= S.cfg.reach;
+    const upd = { samples: sh.samples.slice(), reached, receiverDist: r4(dist), receiverAtArrivalX: r4(rcv.x), receiverAtArrivalY: r4(rcv.y) };
+    if (S.practice) {                                     // warm-up: no rules, just reveal the landing
+      upd.inBounds = Rules.inRect(L, Rules.halfRect(rcv.side));
+      logger.update(sh.recIdx, upd);
+      S.lastLanding = { shotId: sh.id, hitter: sh.hitter, shotType: sh.type, isServe: false, x: L.x, y: L.y, tArrival: r4(sh.plan.T),
+                        target: { x: r4(sh.plan.target.x), y: r4(sh.plan.target.y) }, outcome: !upd.inBounds ? 'out' : reached ? 'returned' : 'winner' };
+      S.practice.done++; S.phase = 'practice'; S.practice.nextTick = S.tick + Math.round(0.7 / DT);
+      S.events.push({ type: 'practiceShot', done: S.practice.done, total: S.practice.seq.length });
+      return;
+    }
+    let winner = null, reason = null;
+    if (sh.isServe) {
+      const ok = Rules.inRect(L, Rules.serviceBox(S.rules));
+      upd.validServe = ok; upd.inBounds = ok;
+      if (!ok) { winner = sh.receiver; reason = L.y * rcv.side <= 0 ? 'net' : 'fault'; }
+    } else {
+      const ok = Rules.inRect(L, Rules.halfRect(rcv.side));
+      upd.inBounds = ok;
+      if (!ok) { winner = sh.receiver; reason = L.y * rcv.side <= 0 ? 'net' : 'out'; }
+    }
+    if (winner === null) {
+      if (reached) {
+        S.phase = 'aim';
+        S.aim = { player: sh.receiver, startTick: S.tick, endTick: S.tick + Math.round(S.cfg.aimTime / DT) };
+        S.lastAim[sh.receiver] = null;
+      } else { winner = sh.hitter; reason = 'winner'; }
+    }
+    logger.update(sh.recIdx, upd);
+    S.lastLanding = { shotId: sh.id, hitter: sh.hitter, shotType: sh.type, isServe: sh.isServe, x: L.x, y: L.y, tArrival: r4(sh.plan.T),
+                      target: { x: r4(sh.plan.target.x), y: r4(sh.plan.target.y) }, outcome: reason || 'returned' };
+    if (winner !== null) Sim.endRally(S, winner, reason, logger);
+  },
+
+  endRally(S, winner, reason, logger) {
+    const sh = S.shot;
+    const { state, events } = Rules.awardPoint(S.rules, winner);
+    logger.finishRally(S.matchId, S.rallyId, winner, reason);
+    S.lastPoint = { rallyId: S.rallyId, winner, reason, hitter: sh.hitter, shotType: sh.type, isServe: sh.isServe,
+                    landing: sh.plan.landing, inBounds: reason === 'winner', events };
+    S.rules = state;
+    S.events.push({ type: 'point', ...S.lastPoint });
+    S.rallyId++;
+    S.phase = 'dead';
+    const gameWon = events.some(e => e.type === 'gameWon');
+    S.resumeTick = S.tick + Math.round((gameWon ? S.cfg.gamePause : S.cfg.pointPause) / DT);
+  },
+};
+
+// =====================================================================
+// INPUT: keyboard state, mouse position in court metres, clicks, hotkeys.
+// =====================================================================
+const Input = {
+  keys: new Set(), mouse: null, click: null, selectedShot: 'clear', debug: false, debugAllowed: false, onChange: null, onHelp: null,
+  GAME_KEYS: new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']),
+  takeClick() { const c = this.click; this.click = null; return c; },
+  setShot(s) { this.selectedShot = s; this.onChange && this.onChange(); },
+  attach(canvas, renderer) {
+    window.addEventListener('keydown', e => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' && t.type === 'text' || t.tagName === 'SELECT')) return;
+      if (this.GAME_KEYS.has(e.code)) { this.keys.add(e.code); e.preventDefault(); return; }
+      if (e.code === 'Digit1' || e.code === 'Numpad1') this.setShot('clear');
+      else if (e.code === 'Digit2' || e.code === 'Numpad2') this.setShot('drop');
+      else if (e.code === 'Digit3' || e.code === 'Numpad3') this.setShot('smash');
+      else if (e.code === 'KeyG' && this.debugAllowed) { this.debug = !this.debug; this.onChange && this.onChange(); }
+      else if (e.code === 'KeyH') { e.preventDefault(); this.onHelp && this.onHelp('toggle'); }
+      else if (e.code === 'Escape') this.onHelp && this.onHelp('close');
+    }, true);
+    window.addEventListener('keyup', e => this.keys.delete(e.code), true);
+    window.addEventListener('blur', () => this.keys.clear());
+    canvas.addEventListener('mousemove', e => { this.mouse = renderer.toCourt(e.offsetX, e.offsetY); });
+    canvas.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      this.mouse = renderer.toCourt(e.offsetX, e.offsetY);
+      this.click = this.mouse;
+    });
+  },
+};
+
+// =====================================================================
+// RENDERER: drawing only; reads S (it may show the truth in debug mode).
+// =====================================================================
+class Renderer {
+  constructor(canvas) {
+    this.c = canvas; this.ctx = canvas.getContext('2d');
+    this.readTheme();
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => this.readTheme());
+    new ResizeObserver(() => this.resize()).observe(canvas.parentElement);
+    this.resize();
+  }
+  readTheme() {
+    const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+    this.col = { surround: g('--surround'), court: g('--court'), line: g('--line'), lineFaint: g('--line-faint'), net: g('--net'),
+      p: [g('--p1'), g('--p2')], shuttle: g('--shuttle'), shadow: g('--shadow'), text: g('--text'),
+      wind: g('--wind'), truth: g('--truth'), obs: g('--obs'), good: g('--good'), bad: g('--bad') };
+  }
+  resize() {
+    const r = this.c.parentElement.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    this.w = r.width; this.h = r.height; this.dpr = dpr;
+    this.c.width = Math.round(r.width * dpr); this.c.height = Math.round(r.height * dpr);
+    const worldW = COURT.doublesHalfW * 2 + 3.4, worldH = COURT.halfLen * 2 + 3.0;
+    this.sc = Math.min(this.w / worldW, this.h / worldH);
+    this.ox = this.w / 2; this.oy = this.h / 2;
+  }
+  X(x) { return this.ox + x * this.sc; }
+  Y(y) { return this.oy + y * this.sc; }
+  toCourt(px, py) { return { x: (px - this.ox) / this.sc, y: (py - this.oy) / this.sc }; }
+  line(x0, y0, x1, y1, color, w) {
+    const c = this.ctx; c.strokeStyle = color; c.lineWidth = w; c.beginPath();
+    c.moveTo(this.X(x0), this.Y(y0)); c.lineTo(this.X(x1), this.Y(y1)); c.stroke();
+  }
+  circle(x, y, rM, fill, stroke, lw = 2, dash = null) {
+    const c = this.ctx; c.beginPath(); c.arc(this.X(x), this.Y(y), Math.max(1, rM * this.sc), 0, Math.PI * 2);
+    if (fill) { c.fillStyle = fill; c.fill(); }
+    if (stroke) { c.setLineDash(dash || []); c.strokeStyle = stroke; c.lineWidth = lw; c.stroke(); c.setLineDash([]); }
+  }
+  cross(x, y, sizeM, color, lw = 2.5) {
+    const s = sizeM; this.line(x - s, y - s, x + s, y + s, color, lw); this.line(x - s, y + s, x + s, y - s, color, lw);
+  }
+  rect(r, fill, stroke) {
+    const c = this.ctx, x = this.X(r.x0), y = this.Y(r.y0), w = (r.x1 - r.x0) * this.sc, h = (r.y1 - r.y0) * this.sc;
+    if (fill) { c.fillStyle = fill; c.fillRect(x, y, w, h); }
+    if (stroke) { c.setLineDash([6, 4]); c.strokeStyle = stroke; c.lineWidth = 2; c.strokeRect(x, y, w, h); c.setLineDash([]); }
+  }
+  text(str, x, y, color, size = 14, align = 'center', weight = 600) {
+    const c = this.ctx; c.font = `${weight} ${size}px system-ui, sans-serif`; c.fillStyle = color; c.textAlign = align; c.textBaseline = 'middle';
+    c.fillText(str, x, y);
+  }
+  alpha(color, a) {
+    // supports #rrggbb and rgba(); used for translucent fills of theme colours
+    if (color.startsWith('#') && color.length === 7) {
+      const n = parseInt(color.slice(1), 16);
+      return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+    }
+    return color;
+  }
+
+  draw(S, ui) {
+    const c = this.ctx, col = this.col, cfg = S.cfg;
+    c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    c.fillStyle = col.surround; c.fillRect(0, 0, this.w, this.h);
+
+    // --- court -----------------------------------------------------------
+    const DW = COURT.doublesHalfW, SW = COURT.singlesHalfW, L = COURT.halfLen, SS = COURT.shortService;
+    c.fillStyle = col.court; c.fillRect(this.X(-DW), this.Y(-L), 2 * DW * this.sc, 2 * L * this.sc);
+
+    const hi = Sim.hitterNow(S);
+    if (hi >= 0) {                                       // valid aiming zone for the current hitter
+      const type = S.phase === 'serve' ? 'serve'
+        : (S.lastAim[hi] && RALLY_SHOTS.includes(S.lastAim[hi].shotType) ? S.lastAim[hi].shotType : ui.selectedShot);
+      const zone = Rules.zoneFor(S.rules, S.players[hi].side, type, cfg);
+      this.rect(zone, this.alpha(col.p[hi], 0.22), col.p[hi]);
+    }
+
+    const lw = Math.max(1.5, 0.04 * this.sc);
+    this.line(-DW, -L, -DW, L, col.lineFaint, lw); this.line(DW, -L, DW, L, col.lineFaint, lw);
+    this.line(-SW, -L, -SW, L, col.line, lw); this.line(SW, -L, SW, L, col.line, lw);
+    for (const s of [-1, 1]) {
+      this.line(-DW, s * L, DW, s * L, col.line, lw);
+      this.line(-DW, s * SS, DW, s * SS, col.line, lw);
+      this.line(-DW, s * (L - COURT.doublesLongService), DW, s * (L - COURT.doublesLongService), col.lineFaint, lw);
+      this.line(0, s * SS, 0, s * L, col.line, lw);
+    }
+    this.line(-DW - 0.2, 0, DW + 0.2, 0, col.net, Math.max(3, 0.07 * this.sc));
+    for (const s of [-1, 1]) this.circle(s * (DW + 0.2), 0, 0.09, col.net, null);
+
+    // --- debug: true wind field ------------------------------------------
+    const tNow = S.tick * DT;
+    if (ui.debug) {
+      for (let gx = -3; gx <= 3.01; gx += 1.5) for (let gy = -6; gy <= 6.01; gy += 1.5) {
+        const w = Wind.at(S.wind, cfg.windStrength, gx, gy, tNow);
+        const k = 0.35;
+        this.line(gx, gy, gx + w.x * k, gy + w.y * k, col.wind, 2);
+        this.circle(gx + w.x * k, gy + w.y * k, 0.05, col.wind, null);
+      }
+      const w0 = Wind.at(S.wind, cfg.windStrength, 0, 0, tNow);
+      this.text(`true wind @ net centre: ${hyp(w0.x, w0.y).toFixed(2)} m/s`, 12, this.h - 18, col.wind, 14, 'left');
+    }
+
+    // --- shuttle trail / truth ------------------------------------------
+    const sh = S.shot;
+    if (sh && ui.debug) {
+      const pts = [];
+      for (let i = 0; i <= 30; i++) pts.push(Physics.shuttleAt(sh.plan, sh.plan.T * i / 30));
+      c.strokeStyle = this.alpha(col.truth, 0.5); c.lineWidth = 1.5; c.setLineDash([4, 4]); c.beginPath();
+      pts.forEach((p, i) => (i ? c.lineTo(this.X(p.x), this.Y(p.y)) : c.moveTo(this.X(p.x), this.Y(p.y)))); c.stroke(); c.setLineDash([]);
+      for (const s of sh.samples) this.circle(s.x, s.y, 0.045, col.obs, null);
+      this.cross(sh.plan.target.x, sh.plan.target.y, 0.1, this.alpha(col.text, 0.6), 1.5);
+      this.cross(sh.plan.landing.x, sh.plan.landing.y, 0.16, col.truth, 3);
+    }
+    if (S.phase === 'dead' && S.lastPoint) {             // reveal where the deciding shot landed
+      const lp = S.lastPoint, clr = lp.reason === 'winner' ? col.good : col.bad;
+      this.circle(lp.landing.x, lp.landing.y, 0.22, null, clr, 3);
+      this.cross(lp.landing.x, lp.landing.y, 0.12, clr, 3);
+      const lab = { winner: 'IN', out: 'OUT', fault: 'FAULT', net: 'NET' }[lp.reason];
+      this.text(lab, this.X(lp.landing.x), this.Y(lp.landing.y) - 0.45 * this.sc, clr, 15, 'center', 800);
+    }
+
+    // --- players -----------------------------------------------------------
+    for (const i of [0, 1]) {
+      const p = S.players[i], pc = col.p[i];
+      this.circle(p.x, p.y, cfg.reach, this.alpha(pc, 0.07), this.alpha(pc, 0.7), 1.5, [5, 5]);
+      this.circle(p.x, p.y, 0.28, p.recover > 0 ? this.alpha(pc, 0.55) : pc, col.line, 2);
+      this.text(ui.names ? ui.names[i] : 'P' + (i + 1), this.X(p.x), this.Y(p.y) - 0.72 * this.sc, pc, 15, 'center', 800);
+    }
+
+    // --- aim marker + countdown ----------------------------------------
+    if (hi >= 0) {
+      const p = S.players[hi], a = S.lastAim[hi];
+      if (a) {
+        const type = S.phase === 'serve' ? 'serve' : a.shotType;
+        const zone = Rules.zoneFor(S.rules, p.side, type, cfg), t = Rules.clampTo(a.target, zone);
+        const sig = cfg.shots[type].noise * cfg.noiseMult;
+        this.circle(t.x, t.y, Math.max(0.08, 2 * sig), this.alpha(col.p[hi], 0.15), col.p[hi], 1.5, [3, 4]);
+        this.cross(t.x, t.y, 0.08, col.p[hi], 2);
+        this.text(type, this.X(t.x), this.Y(t.y) + (Math.max(0.08, 2 * sig) + 0.3) * this.sc, col.p[hi], 14);
+      }
+      const end = S.phase === 'serve' ? S.phaseEndTick : S.aim.endTick;
+      const total = S.phase === 'serve' ? cfg.serveAimTime : cfg.aimTime;
+      const frac = clamp((end - S.tick) * DT / total, 0, 1);
+      c.strokeStyle = col.p[hi]; c.lineWidth = 4; c.beginPath();
+      c.arc(this.X(p.x), this.Y(p.y), 0.42 * this.sc, -Math.PI / 2, -Math.PI / 2 + frac * 2 * Math.PI); c.stroke();
+    }
+
+    // --- TabPFN bot: landing belief (90 % ellipse + radius-r region); "Show bot's mind": rollouts + plan ---
+    const bot = ui.bot;
+    if (bot) {
+      const bi = ui.botIdx, bc = col.p[bi], est = bot.landing.est;
+      if (est && S.phase === 'flight' && sh && est.shotId === sh.id) {
+        const rx = Math.max(3, 2.146 * Math.sqrt(est.cov[0][0]) * this.sc), ry = Math.max(3, 2.146 * Math.sqrt(est.cov[1][1]) * this.sc);
+        c.setLineDash([5, 4]); c.strokeStyle = bc; c.lineWidth = 2; c.fillStyle = this.alpha(bc, 0.14); c.beginPath();
+        c.ellipse(this.X(est.mean[0]), this.Y(est.mean[1]), rx, ry, 0, 0, Math.PI * 2); c.fill(); c.stroke(); c.setLineDash([]);
+        this.circle(est.mean[0], est.mean[1], cfg.reach, null, this.alpha(bc, 0.85), 1.5, [2, 4]);
+        this.text(ui.debug ? `TabPFN 90% (t+${est.c}s)` : `${OPPONENT_NAME} expects it here`, this.X(est.mean[0]), this.Y(est.mean[1]) - ry - 10, bc, 13);
+      }
+      const poly = (pts, w, a) => {
+        if (!pts || pts.length < 2) return;
+        c.strokeStyle = this.alpha(bc, a); c.lineWidth = w; c.beginPath();
+        pts.forEach((q, i) => (i ? c.lineTo(this.X(q[0]), this.Y(q[1])) : c.moveTo(this.X(q[0]), this.Y(q[1])))); c.stroke();
+      };
+      if (ui.mind && bot.plan) {
+        for (const pth of bot.plan.shown || []) poly(pth, 1, 0.22);
+        poly(bot.plan.path, 3, 0.95);
+      }
+      const d = bot.shots.decision;
+      if (ui.mind && d && hi === bi && !d.committed && d.ready) {
+        const top = Math.max(1e-6, ...d.cands.map(k => k.score || 0));
+        for (const k of d.cands) if (k.mx != null) this.circle(k.mx, k.my, 0.06 + 0.08 * k.score / top, this.alpha(bc, 0.25 + 0.7 * k.score / top), null);
+        if (d.chosen && d.chosen.mx != null) this.circle(d.chosen.mx, d.chosen.my, 0.2, null, bc, 2.5);
+      }
+    }
+
+    // --- shuttle (shadow on the ground, body raised and enlarged by z) --------
+    let sp = null;
+    if (S.phase === 'flight' && sh) sp = Physics.shuttleAt(sh.plan, (S.tick - sh.startTick) * DT);
+    else if (S.phase === 'aim' && sh) sp = { ...sh.plan.landing, z: 0.5 };
+    else if (S.phase === 'serve') { const p = S.players[S.rules.server]; sp = { x: p.x + 0.5, y: p.y + 0.15, z: 0.6 }; }
+    else if (S.phase === 'dead' && sh) sp = { ...sh.plan.landing, z: 0 };
+    if (sp) {
+      c.fillStyle = col.shadow; c.beginPath();
+      c.ellipse(this.X(sp.x), this.Y(sp.y), (0.09 + 0.015 * sp.z) * this.sc, (0.06 + 0.01 * sp.z) * this.sc, 0, 0, Math.PI * 2); c.fill();
+      const by = this.Y(sp.y) - sp.z * 0.28 * this.sc, br = (0.07 + 0.022 * sp.z) * this.sc;
+      c.beginPath(); c.arc(this.X(sp.x), by, br, 0, Math.PI * 2); c.fillStyle = col.shuttle; c.fill();
+      c.strokeStyle = '#333'; c.lineWidth = 1.2; c.stroke();
+      c.beginPath(); c.arc(this.X(sp.x), by, br * 0.4, 0, Math.PI * 2); c.fillStyle = '#c0392b'; c.fill();
+    }
+  }
+}
+
+// =====================================================================
+// SELF-TEST: open badminton.html#selftest (also runnable headless in node).
+// ScriptController is a trivial deterministic test driver, not a bot.
+// =====================================================================
+class ScriptController {
+  constructor() { this.o = null; this.wait = 0; this.n = 0; }
+  observe(o) { this.o = o; }
+  act() {
+    const o = this.o; let tx = 0, ty = o.side * 3.5;
+    const inc = o.incoming;
+    if (inc && inc.hitter !== o.me && inc.samples.length >= 2) {
+      const s = inc.samples, a = s[s.length - 2], b = s[s.length - 1], dt = (b.t - a.t) || 0.05;
+      tx = b.x + (b.x - a.x) / dt * 0.4; ty = b.y + (b.y - a.y) / dt * 0.4;
+    }
+    const out = { move: { x: clamp((tx - o.self.x) * 2, -1, 1), y: clamp((ty - o.self.y) * 2, -1, 1) } };
+    if (o.mustHit) {
+      if (++this.wait > 30) {
+        this.wait = 0; this.n++;
+        const type = o.phase === 'serve' ? 'serve' : RALLY_SHOTS[this.n % 3], z = o.validZones[type];
+        out.hit = { target: { x: z.x0 + (z.x1 - z.x0) * (((this.n * 37) % 10) + 0.5) / 10,
+                              y: z.y0 + (z.y1 - z.y0) * (((this.n * 53) % 10) + 0.5) / 10 }, shotType: type };
+      }
+    } else this.wait = 0;
+    return out;
+  }
+}
+
+const SelfTest = {
+  asyncChecks: [],
+  /** Runs every check, including the ones that need a promise to settle. */
+  async runAll() {
+    this.asyncChecks = [];
+    const saved = SelfTest.saveCounters(), res = this.run();
+    for (const [name, ok] of await Promise.all(this.asyncChecks)) res.push({ name, ok: !!ok });
+    SelfTest.restoreCounters(saved);
+    return res;
+  },
+  /** Test fixtures must not pollute the play-mode counters / health shown in the UI. */
+  saveCounters() {
+    return { c: { ...Guard.counters }, a: Guard.accepted, r: Guard.rejected, v: Guard.lastViolation, log: CallLog.entries.slice(), api: CallLog.apiCalls,
+             h: { ...TabPFNHealth }, rb: { log: RateBudget.log.slice(), b: RateBudget.blockedUntil, d: RateBudget.deferred } };
+  },
+  restoreCounters(x) {
+    Guard.counters = x.c; Guard.accepted = x.a; Guard.rejected = x.r; Guard.lastViolation = x.v; CallLog.entries = x.log; CallLog.apiCalls = x.api;
+    Object.assign(TabPFNHealth, x.h); RateBudget.log = x.rb.log; RateBudget.blockedUntil = x.rb.b; RateBudget.deferred = x.rb.d;
+  },
+  run() {
+    const res = [], check = (name, ok) => res.push({ name, ok: !!ok });
+    const cfg = DEFAULT_CONFIG;
+    // --- rules -------------------------------------------------------------
+    const at = (a, b, bestOf = 1) => ({ ...Rules.newMatch(bestOf), scores: [a, b] });
+    let r = Rules.awardPoint(at(20, 20), 0);
+    check('20-20 -> 21-20 is not a game', r.state.scores[0] === 21 && !r.events.length);
+    r = Rules.awardPoint(r.state, 0);
+    check('22-20 wins the game (and single-game match)', r.events.some(e => e.type === 'gameWon') && r.state.over && r.state.matchWinner === 0);
+    r = Rules.awardPoint(at(29, 29), 1);
+    check('29-29 -> 29-30 wins at the cap', r.state.over && r.state.matchWinner === 1);
+    r = Rules.awardPoint(at(28, 29), 0);
+    check('28-29 -> 29-29 continues', !r.events.length && r.state.scores.join() === '29,29');
+    r = Rules.awardPoint(at(24, 23), 0);
+    check('25-23 wins (win by 2 in deuce)', r.events.some(e => e.type === 'gameWon'));
+    r = Rules.awardPoint(at(20, 5, 3), 0);
+    check('best of 3: game 1 won -> scores reset, ends switch, winner serves, not over',
+      !r.state.over && r.state.scores.join() === '0,0' && r.state.ends.join() === '-1,1' && r.state.server === 0 && r.state.gameIdx === 1);
+    r = Rules.awardPoint(at(3, 3), 1);
+    check('rally winner serves next', r.state.server === 1);
+    let st = Rules.newMatch(1);
+    check('P1 serves first from the bottom', st.server === 0 && st.ends[0] === 1);
+    check('even score -> right court (bottom player: x > 0)', Rules.serverCourtSign(st) === 1);
+    let box = Rules.serviceBox(st);
+    check('diagonal service box is top-left (receiver right)', box.x0 === -COURT.singlesHalfW && box.x1 === 0 && box.y0 === -COURT.halfLen && box.y1 === -COURT.shortService);
+    st = { ...st, scores: [1, 0] };
+    check('odd score -> left court', Rules.serverCourtSign(st) === -1 && Rules.serviceBox(st).x0 === 0);
+    st = { ...Rules.newMatch(1), server: 1 };
+    check('top server on even score uses x < 0 (their right)', Rules.serverCourtSign(st) === -1 && Rules.serviceBox(st).y0 === COURT.shortService);
+    box = Rules.serviceBox(Rules.newMatch(1));
+    check('serve short of the short service line is a fault', !Rules.inRect({ x: -1, y: -1.5 }, box) && Rules.inRect({ x: -1, y: -3 }, box));
+    check('serve into the wrong half is a fault', !Rules.inRect({ x: 1, y: -3 }, box));
+    check('landing beyond the singles sideline is out', !Rules.inRect({ x: 2.7, y: -3 }, Rules.halfRect(-1)));
+    check('landing on the line is in', Rules.inRect({ x: 2.59, y: -6.7 }, Rules.halfRect(-1)));
+
+    // --- determinism -------------------------------------------------------
+    const a = SelfTest.simulate('seed-42', 40000), b = SelfTest.simulate('seed-42', 40000), c = SelfTest.simulate('seed-43', 40000);
+    check(`same seed -> identical shot log (${a.n} shots)`, a.json === b.json && a.n > 10);
+    check('different seed -> different log', a.json !== c.json);
+    check('replay from rally snapshot + recorded actions reproduces the rally', SelfTest.replay());
+
+    // --- observation hides the truth; log has all fields ----------------------
+    const S = Sim.create('obs', 1, cfg, 1), Lg = new ShotLogger(), sc = [new ScriptController(), new ScriptController()];
+    let leak = false, sawFlight = false;
+    for (let k = 0; k < 4000; k++) {
+      Sim.step(S, sc, Lg);
+      if (S.phase === 'flight') {
+        sawFlight = true;
+        for (const i of [0, 1]) {
+          const ob = Observation.build(S, i), ll = ob.lastLanding;
+          // lastLanding must describe an earlier shot, and never reveal the opponent's target
+          if (ll && (ll.shotId === ob.incoming.shotId || (ll.hitter !== i && ll.target !== null))) leak = true;
+          delete ob.lastLanding;
+          if (/landing|wind|drift|noise|plan|target/i.test(JSON.stringify(ob))) leak = true;
+        }
+      }
+    }
+    check('observations never contain wind / true landing', sawFlight && !leak);
+    const need = ['shotType', 'targetX', 'hitterX', 'samples', 'trueLandingX', 'windAtHitX', 'meanWindX', 'inBounds', 'rallyWinner', 'rallyReason'];
+    const rec = Lg.records.find(x => x.rallyWinner);
+    check('shot log has all required fields', rec && need.every(k => k in rec) && rec.samples.length > 3);
+    check('CSV header has all columns', Lg.toCSV().split('\n')[0].split(',').length === LOG_COLUMNS.length);
+
+    // --- M3: physics additions keep M1 behaviour; court change / lag / warm-up --------
+    const m1Step = (p, mv, dt, c, locked) => {          // the M1 stepPlayer, verbatim, as a reference
+      const q = { ...p };
+      if (locked) { q.vx = 0; q.vy = 0; }
+      else {
+        let mx = mv.x, my = mv.y; const L = hyp(mx, my);
+        if (L > 1) { mx /= L; my /= L; }
+        const vmax = c.playerSpeed * (q.recover > 0 ? c.recoverySpeedFactor : 1);
+        let dvx = mx * vmax - q.vx, dvy = my * vmax - q.vy;
+        const dv = hyp(dvx, dvy), lim = c.accel * dt;
+        if (dv > lim) { dvx *= lim / dv; dvy *= lim / dv; }
+        q.vx += dvx; q.vy += dvy; q.x += q.vx * dt; q.y += q.vy * dt;
+      }
+      const xm = COURT.doublesHalfW + 0.9, ym = COURT.halfLen + 1.0, nm = 0.25;
+      const y0 = q.side > 0 ? nm : -ym, y1 = q.side > 0 ? ym : -nm;
+      if (q.x < -xm) { q.x = -xm; q.vx = 0; } if (q.x > xm) { q.x = xm; q.vx = 0; }
+      if (q.y < y0) { q.y = y0; q.vy = 0; } if (q.y > y1) { q.y = y1; q.vy = 0; }
+      if (q.recover > 0) q.recover--;
+      return q;
+    };
+    let pa = { x: 0, y: 3, vx: 0, vy: 0, side: 1, recover: 0 }, pb = { ...pa }, same = true;
+    const rr = { s: 7 };
+    for (let k = 0; k < 3000; k++) {
+      const mv = k % 40 < 30 ? { x: RNG.next(rr) * 2 - 1, y: RNG.next(rr) * 2 - 1 } : { x: 0, y: 0 };
+      pa = m1Step(pa, mv, DT, cfg, k % 500 > 480); pb = Physics.stepPlayer(pb, mv, DT, cfg, k % 500 > 480, Sim.envFor({ slippery: false }));
+      if (pa.x !== pb.x || pa.y !== pb.y || pa.vx !== pb.vx || pa.vy !== pb.vy) same = false;
+    }
+    check('default friction/grip/lag reproduce the M1 movement exactly (3000 ticks)', same);
+
+    const speedAfter = (env, c2) => { let q = { x: 0, y: 3, vx: 0, vy: 0, side: 1, recover: 0 }; for (let k = 0; k < 12; k++) q = Physics.stepPlayer(q, { x: 1, y: 0 }, DT, c2 || cfg, false, env); return q.vx; };
+    check('slippery court / tired legs slows acceleration', speedAfter(Sim.envFor({ slippery: true })) < 0.5 * speedAfter(Sim.envFor({ slippery: false })));
+    check('command lag delays the response', speedAfter(null, { ...cfg, lag: 0.1 }) < 0.01 && speedAfter(null, cfg) > 1);
+
+    const runEnv = (S0, acts) => { const S2 = Sim.restore(S0), L2 = new ShotLogger(), rc = [new ReplayController(acts, 0), new ReplayController(acts, 1)];
+      for (let k = 0; k < acts.length; k++) Sim.step(S2, rc, L2, acts[k].env); return JSON.stringify({ p: S2.players, l: L2.records }); };
+    const SE = Sim.create('env-replay', 1, cfg, 1); SE.events = [];
+    const SE0 = Sim.snapshot(SE), LE = new ShotLogger(), sce = [new ScriptController(), new ScriptController()], envActs = [];
+    for (let k = 0; k < 3000; k++) envActs.push(Sim.step(SE, sce, LE, k === 900 ? { slippery: true } : k === 2200 ? { slippery: false } : null));
+    check('court change mid-rally is recorded and replays identically', runEnv(SE0, envActs) === JSON.stringify({ p: SE.players, l: LE.records }));
+
+    const SP = Sim.create('practice', 1, cfg, 1), LP = new ShotLogger(), idle = { observe() {}, act: () => ({ move: { x: 0, y: 0 } }) };
+    const wb = { o: null, observe(o) { this.o = o; }, act() { return this.o && this.o.mustHit ? { move: { x: 0, y: 0 }, hit: { target: Rules.center(this.o.validZones.clear), shotType: 'clear' } } : { move: { x: 0, y: 0 } }; } };
+    const SPr = Sim.createPractice('practice', cfg, 1, 6, 3);
+    for (let k = 0; k < 60000 && SPr.phase !== 'practiceDone'; k++) Sim.step(SPr, [idle, wb], LP);
+    check(`warm-up practice: machine + bot practice shots, no scoring (${LP.records.length} shots)`,
+      SPr.phase === 'practiceDone' && LP.records.length === 9 && LP.records.every(r => r.practice) && SPr.rules.scores.join() === '0,0' && SPr.lastLanding.tArrival > 0);
+    void SP;
+
+    // Shots to the human vs the bot fly slower: same landing point, flight time x botShotSlowdown
+    const shotTo = (slowTo, hitter) => {
+      const S0 = Sim.create('slow', 1, { ...cfg, slowShotsTo: slowTo }, 1), L0 = new ShotLogger();
+      S0.phase = 'flight'; Sim.launch(S0, hitter, 'clear', { x: 0.5, y: hitter === 1 ? 5 : -5 }, L0, false);
+      return S0.shot.plan;
+    };
+    const fast = shotTo(null, 1), slow = shotTo(0, 1), toBot = shotTo(0, 0);
+    check('bot shots to the human fly 3x slower but land on the same spot (shots to the bot unchanged)',
+      Math.abs(slow.T - 3 * fast.T) < 1e-9 && slow.landing.x === fast.landing.x && slow.landing.y === fast.landing.y && !toBot.timeScale);
+
+    // --- M3: TabPFN-only bot ------------------------------------------------------------
+    const savedMode = Guard.mode, savedThrow = Guard.strictThrow;
+    Guard.mode = 'play'; Guard.strictThrow = false;
+    const rej0 = Guard.rejected;
+    const refused = ['knn', 'oracle', 'linear-extrapolation', 'physics-fit', 'ekf', 'backend:mock', undefined].every(pv => !Guard.check({ provenance: pv }, 'test'));
+    check('play-mode guard refuses every non-TabPFN provenance', refused && Guard.rejected - rej0 === 7);
+    check('play-mode guard accepts tabpfn and tabpfn-linearized', Guard.check({ provenance: 'tabpfn' }, 'test') && Guard.check({ provenance: 'tabpfn-linearized' }, 'test'));
+
+    const tm = Observation.build(S, 0).params.shotTiming;
+    const ent = { type: 'clear', p0: { x: 0, y: 4 }, botAt: [{ x: 0, y: -3 }, { x: 0.2, y: -3.2 }, { x: 0.5, y: -3.5 }],
+                  samples: Array.from({ length: 13 }, (_, i) => ({ t: r4(i * 0.05), x: r4(0.01 * i), y: r4(4 - 0.6 * i), z: r4(2 + 0.3 * i) })) };
+    const cps = BOTCFG.landing.checkpoints, lr = [0, 1, 2].map(k => LandingRows.row(ent, k, cps, true));
+    check('landing rows: one value per column at every checkpoint, numbers only',
+      lr.every((q, k) => q && q.x.length === LandingRows.names(k, cps, true).length && q.x.every(Number.isFinite)));
+    check('dynamics / shot rows match their column lists',
+      DynRows.row({ s: { x: 0, y: 1, vx: 2, vy: 3 }, u: [1, 0], up: [0, 1] }).length === DynRows.names.length &&
+      ShotRows.row('drop', { x: 0, y: 3 }, { x: 1, y: -2 }, 5, [0, 0]).length === ShotRows.names.length);
+    void tm;
+
+    // CEM + Monte Carlo chance constraint on a hand-built linear model (planner/cost unit test, not a provider)
+    const k6 = 0.6, linT = { t0: 0, steps: Array.from({ length: 12 }, () => ({ s: { vx: 0, vy: 0 }, u: [0, 0], up: [0, 0], f: [0, 0], std: [0.02, 0.02],
+      J: { vx: [-k6, 0], vy: [0, -k6], ux: [k6 * 4.5, 0], uy: [0, k6 * 4.5], upx: [0, 0], upy: [0, 0] } })) };
+    const gg = { s: 3 }, epsT = Array.from({ length: 8 }, () => Array.from({ length: 12 }, () => [RNG.gauss(gg), RNG.gauss(gg)]));
+    const CT = { s0: { x: 0, y: -3.3, vx: 0, vy: 0 }, up0: [0, 0], H: 12, dt: 0.1, S: 8, eps: epsT, p: 0.9, w: BOTCFG.mpc.w, r: 1, vmax: 4.5,
+      landS: Array.from({ length: 8 }, () => ({ x: 2.0, y: -5.6, t: 0.9 })), base: { x: 0, y: -3.3 },
+      bounds: { x0: -3.4, x1: 3.4, y0: -7.5, y1: -0.3 }, step: (C, k, v, u, up) => MPC.linStep(linT, k, v, u, up) };
+    const pl = new CEMPlanner(BOTCFG.mpc, { s: 11 }).plan(CT, null), idleCost = MPC.evaluate(Array.from({ length: 12 }, () => [0, 0]), CT).cost;
+    check(`CEM + chance constraint plans an interception (P(reach) ${pl.pHit.toFixed(2)})`, pl.pHit >= 0.9 && pl.cost < idleCost);
+
+    // Without TabPFN the bot never substitutes another predictor: it brakes and counts failures.
+    const deadClient = { prefit() {}, fit: () => Promise.reject(new Error('down')), predict: () => Promise.reject(new Error('down')) };
+    const offBot = new BotController({ makeRegressor: t => new TabPFNRegressorAdapter(deadClient, t), storageKey: null });
+    const OS = Sim.create('no-tabpfn', 1, cfg, 1), OL = new ShotLogger(), oc = [new ScriptController(), offBot];
+    let maxV = 0;
+    for (let k = 0; k < 6000; k++) { Sim.step(OS, oc, OL); if (OS.phase === 'flight') maxV = Math.max(maxV, hyp(OS.players[1].vx, OS.players[1].vy)); }
+    check('no TabPFN model -> the bot brakes (never moves on another method)', maxV === 0 && offBot.status === 'waiting');
+
+    // Forced injection: a provider answering with provenance "knn" is refused by the estimator.
+    const knnClient = { prefit() {}, fit: () => Promise.resolve({}),
+      predict: (X, Y, Xq) => Promise.resolve(Object.assign({ backend: 'knn' }, ...Object.keys(Y).map(k => ({ [k]: { q10: Xq.map(() => -1), q50: Xq.map(() => 0), q90: Xq.map(() => 1) } })))) };
+    const inj = new TabularLandingEstimator(t => new TabPFNRegressorAdapter(knnClient, t));
+    inj.entries = Array.from({ length: 12 }, (_, i) => ({ ...ent, shotId: i, landing: { x: 0, y: -5 }, tArrival: 1.5 })); inj.version++;
+    inj.cur = { ...ent, shotId: 99, byBot: false, asked: -1, estimates: [] };
+    const rej1 = Guard.rejected;
+    inj.query(0);
+    SelfTest.asyncChecks.push(new Promise(res => setTimeout(() => res(['injected non-TabPFN landing output is rejected', inj.est === null && Guard.rejected === rej1 + 1]), 0)));
+
+    // No secrets in exports
+    const blob = [OL.toCSV(), OL.toJSON(), JSON.stringify(CallLog.entries), JSON.stringify(offBot.providerLog),
+                  JSON.stringify({ landing: offBot.landing.entries, dynamics: offBot.dynamics.trans })].join('\n');
+    check('exports contain no token or token-like secrets', !/TABPFN_TOKEN|eyJ[A-Za-z0-9_-]{12,}|[A-Za-z0-9_-]{40,}/.test(blob));
+    Guard.mode = savedMode; Guard.strictThrow = savedThrow;
+    return res;
+  },
+  simulate(seed, ticks) {
+    const S = Sim.create(seed, 3, DEFAULT_CONFIG, 1), L = new ShotLogger(), c = [new ScriptController(), new ScriptController()];
+    for (let k = 0; k < ticks && S.phase !== 'over'; k++) Sim.step(S, c, L);
+    return { json: JSON.stringify({ log: L.records, rules: S.rules, players: S.players }), n: L.records.length };
+  },
+  replay() {
+    const S = Sim.create('replay-test', 1, DEFAULT_CONFIG, 1), L = new ShotLogger(), c = [new ScriptController(), new ScriptController()];
+    let snap = null, acts = [], done = null;
+    const handle = s => { for (const e of s.events.splice(0)) {
+      if (e.type === 'rallyStart') { snap = Sim.snapshot(s); acts = []; }
+      if (e.type === 'point' && e.rallyId === 2) done = { snap, acts };
+    } };
+    handle(S);
+    for (let k = 0; k < 200000 && !done; k++) { acts.push(Sim.step(S, c, L)); handle(S); }
+    if (!done) return false;
+    const R = Sim.restore(done.snap), L2 = new ShotLogger(), rc = [new ReplayController(done.acts, 0), new ReplayController(done.acts, 1)];
+    let fin = false;
+    for (let k = 0; k < done.acts.length && !fin; k++) { Sim.step(R, rc, L2); fin = R.events.some(e => e.type === 'point'); }
+    const orig = L.records.filter(r => r.rallyId === 2);
+    return fin && orig.length > 0 && JSON.stringify(orig) === JSON.stringify(L2.records);
+  },
+};
+
+// =====================================================================
+// APP: wires the sim to the real-time loop, the UI and the human input.
+// Starts in PLAY MODE: P2 = TabPFN-only bot (landing + dynamics + own shots from TabPFN, CEM planner).
+// =====================================================================
+const IdleController = { observe() {}, act: () => ({ move: { x: 0, y: 0 } }) };
+const OPPONENT_NAME = 'TabPFN-3.5';      // the name players see for the TabPFN opponent
+const SETTINGS = { windStrength: '×', noiseMult: '×', reach: ' m', playerSpeed: ' m/s', friction: ' m/s²', grip: '×', lag: ' s', botShotSlowdown: '×' };
+
+const App = {
+  init() {
+    this.$ = id => document.getElementById(id);
+    const qs = new URLSearchParams(location.search);
+    this.devFlag = qs.get('dev') !== '0';                 // developer mode is the default; ?dev=0 = clean player view
+    if (this.devFlag) document.body.classList.add('dev');   // reveals the technical panels
+    Input.debugAllowed = this.devFlag;
+    Guard.strictThrow = this.devFlag;               // development: a provenance violation throws visibly
+    Guard.onViolation = msg => this.showGuardError(msg);
+    window.addEventListener('unhandledrejection', e => {
+      const m = String((e.reason && e.reason.message) || e.reason || '');
+      if (m.includes('ProvenanceGuard')) this.showGuardError(m);
+    });
+    this.renderer = new Renderer(this.$('court'));
+    let saved = 'classic';
+    try { saved = localStorage.getItem('badminton.palette') || 'classic'; } catch (e) { /* storage unavailable */ }
+    this.applyPalette(saved);
+    Input.attach(this.$('court'), this.renderer);
+    Input.onChange = () => this.syncControls();
+    Input.onHelp = cmd => (cmd === 'toggle' ? (this.helpOpen ? this.closeHelp() : this.showHelp(null)) : this.helpOpen && this.closeHelp());
+    this.cfg = clone(DEFAULT_CONFIG);
+    this.logger = new ShotLogger();
+    this.matchId = 0;
+    this.p1 = new HumanController(Input, KEYMAP_P1);
+    this.p2human = new HumanController(Input, KEYMAP_P2);
+    // P2 bot: every regressor is a thin adapter over the existing TabPFN connection.
+    this.bot = new BotController({ makeRegressor: task => new TabPFNRegressorAdapter(TabPFNClient, task) });
+    this.playMode = 'bot'; this.mode = 'live'; this.started = false; this.paused = false; this.pendingEnv = null;
+    this.bindUI();
+    this.$('seed').value = String(Math.floor(Math.random() * 1e6));
+    TabPFNClient.health().then(() => this.showServiceStatus());
+    this.names = ['You', OPPONENT_NAME];
+    this.S = Sim.create('menu', 1, this.cfg, 0); this.S.events = [];
+    this.ctrls = [IdleController, IdleController];
+    if (qs.get('dev') === '1') this.$('devtools').open = true;   // ?dev=1 also opens (and loads) the developer tools
+    requestAnimationFrame(ts => this.frame(ts));
+    if (location.hash === '#selftest') this.showSelfTest();
+    else if (qs.get('start') === 'bot') this.startBot();            // link shortcut: skip the start screen
+  },
+
+  bindUI() {
+    for (const b of document.querySelectorAll('#shotbtns button')) b.onclick = () => { Input.setShot(b.dataset.shot); b.blur(); };
+    for (const b of document.querySelectorAll('.swatch')) b.onclick = () => { this.applyPalette(b.dataset.palette); b.blur(); };
+    // Before the first game of the session, explain how to play; then start the chosen mode.
+    const begin = start => (this.helpSeen ? start() : this.showHelp(start));
+    this.$('start-bot').onclick = () => begin(() => this.startBot());
+    this.$('start-hotseat').onclick = () => begin(() => { this.playMode = 'human'; this.newMatch(); });
+    this.$('help-close').onclick = () => this.closeHelp();
+    this.$('warm-skip').onclick = () => this.finishWarmup(true);
+    this.$('pause-retry').onclick = () => this.retryTabPFN();
+    this.$('restart').onclick = () => this.newMatch();
+    this.$('menu').onclick = () => this.showStart();
+    this.$('ov-new').onclick = () => this.newMatch();
+    this.$('ov-close').onclick = () => this.$('overlay').classList.add('hidden');
+    this.$('replay').onclick = () => this.startReplay();
+    this.$('court-btn').onclick = e => { e.target.blur(); this.pendingEnv = { slippery: !this.S.env.slippery }; };
+    this.$('debug').onchange = e => { Input.debug = e.target.checked; e.target.blur(); };
+    this.$('mind').onchange = e => e.target.blur();
+    this.$('slowmo').onchange = e => { BOTCFG.slowmo.on = e.target.checked; e.target.blur(); };
+    this.$('dl-csv').onclick = () => this.download('badminton_shots.csv', this.logger.toCSV(), 'text/csv');
+    this.$('dl-json').onclick = () => this.download('badminton_shots.json', this.logger.toJSON(), 'application/json');
+    this.$('dl-context').onclick = () => this.download('tabpfn_context.json', JSON.stringify(this.contextExport(), null, 1), 'application/json');
+    this.$('clearlog').onclick = () => { this.logger = new ShotLogger(); this.lastRally = null; };
+    this.$('reset-bot').onclick = () => { this.bot.clearMemory(); if (this.playMode === 'bot' && this.started) this.startBot(); };
+    this.$('devtools').addEventListener('toggle', () => { if (this.$('devtools').open) this.loadDevTools(); });
+    for (const k of Object.keys(SETTINGS)) {
+      const el = this.$(k), out = this.$('o-' + k), unit = SETTINGS[k];
+      el.value = this.cfg[k]; out.textContent = (+el.value).toFixed(k === 'lag' ? 3 : 2) + unit;
+      el.oninput = () => {
+        this.cfg[k] = +el.value; out.textContent = (+el.value).toFixed(k === 'lag' ? 3 : 2) + unit;
+        if (this.mode === 'live') this.S.pendingCfg[k] = +el.value;
+      };
+      el.onchange = () => el.blur();
+    }
+    const sl = this.$('slowspeed'), so = this.$('o-slowspeed');
+    sl.value = BOTCFG.slowmo.speed; so.textContent = Math.round(BOTCFG.slowmo.speed * 100) + '%';
+    sl.oninput = () => { BOTCFG.slowmo.speed = +sl.value; so.textContent = Math.round(BOTCFG.slowmo.speed * 100) + '%'; };
+    sl.onchange = () => sl.blur();
+    this.syncControls();
+  },
+
+  syncControls() {
+    for (const b of document.querySelectorAll('#shotbtns button')) b.setAttribute('aria-pressed', String(b.dataset.shot === Input.selectedShot));
+    this.$('debug').checked = Input.debug;
+  },
+
+  /** How-to-play screen. With `then`, it is shown before a game and starts it when closed;
+   *  otherwise (H key) it pauses the running game until closed. */
+  showHelp(then) {
+    this.helpOpen = true; this.helpThen = then || null;
+    Input.keys.clear();
+    this.$('help-close').textContent = then ? 'Start playing' : (this.started ? 'Resume' : 'Close');
+    this.$('help').classList.remove('hidden');
+    this.$('help-close').focus();
+  },
+  closeHelp() {
+    this.helpOpen = false; this.helpSeen = true;
+    this.$('help').classList.add('hidden');
+    this.$('help-close').blur();
+    const then = this.helpThen; this.helpThen = null;
+    if (then) then();
+  },
+
+  /** Colour theme: "classic" is the original scheme; others override the same CSS tokens. Remembered per browser. */
+  applyPalette(name) {
+    const btn = document.querySelector(`.swatch[data-palette="${name}"]`) ? name : 'classic';
+    if (btn === 'classic') delete document.documentElement.dataset.palette; else document.documentElement.dataset.palette = btn;
+    for (const b of document.querySelectorAll('.swatch')) b.setAttribute('aria-checked', String(b.dataset.palette === btn));
+    const label = document.querySelector(`.swatch[data-palette="${btn}"]`).title;
+    this.$('theme-name').textContent = label;
+    try { localStorage.setItem('badminton.palette', btn); } catch (e) { /* storage unavailable */ }
+    this.renderer.readTheme();                      // the canvas caches colours: refresh them
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  },
+
+  /** On the start screen, explain plainly when the opponent cannot be reached (two-player mode still works). */
+  showServiceStatus() {
+    const el = this.$('start-status'), b = TabPFNClient.base();
+    let msg = '';
+    if (b === null) msg = `To play against ${OPPONENT_NAME}, start the game server (python server.py) and open http://localhost:8000. Two-player mode works without it.`;
+    else if (!TabPFNClient.online) msg = TabPFNClient.backend === 'none'
+      ? `${OPPONENT_NAME} is not set up on this server yet (missing TabPFN access token). Two-player mode is available.`
+      : `Can't reach ${OPPONENT_NAME} right now. Check that the game server is running, then reload. Two-player mode is available.`;
+    else if (TabPFNClient.backend !== 'tabpfn') msg = `This server is not connected to the TabPFN model, so ${OPPONENT_NAME} can't play. Two-player mode is available.`;
+    el.hidden = !msg; el.textContent = msg;
+  },
+
+  showStart() {
+    this.started = false;
+    for (const id of ['warmup', 'pause', 'overlay']) this.$(id).classList.add('hidden');
+    this.$('start').classList.remove('hidden');
+  },
+
+  /** Play vs the TabPFN bot: warm up first unless a valid stored TabPFN context exists. */
+  startBot() {
+    this.playMode = 'bot';
+    this.$('start').classList.add('hidden');
+    if (this.bot.hasValidStoredContext()) {
+      this.bot.setMode('play'); this.bot.prefitAll(); this.newMatch();
+      const c = this.bot.contextSizes();
+      this.banner(this.devFlag ? `Using the stored TabPFN context (${c.landing} landings, ${c.dynamics} moves). Warm-up skipped.`
+                               : `${OPPONENT_NAME} remembers this court, so there's no warm-up.`, 3500);
+    } else this.startWarmup();
+  },
+
+  startWarmup() {
+    const W = BOTCFG.warmup;
+    this.matchId++;
+    this.S = Sim.createPractice(this.$('seed').value.trim() + '-warmup', this.cfg, this.matchId, W.machineShots, W.botShots);
+    this.bot.reset(); this.bot.setMode('warmup');
+    this.ctrls = [IdleController, this.bot]; this.mode = 'warmup'; this.started = true; this.paused = false; this.acc = 0;
+    this.$('warm-bar').style.width = '0%';
+    this.$('warm-text').textContent = `0 / ${W.machineShots + W.botShots} practice shots`;
+    this.$('warmup').classList.remove('hidden');
+    this.setNames('bot');
+  },
+
+  finishWarmup(skipped) {
+    if (this.mode !== 'warmup') return;
+    this.$('warmup').classList.add('hidden');
+    this.bot.setMode('play'); this.bot.prefitAll(); this.bot.save();
+    this.newMatch();
+    if (skipped && this.bot.lowContext()) this.banner(`Warm-up skipped. ${OPPONENT_NAME} will keep learning as you play.`, 4000);
+  },
+
+  newMatch() {
+    const seed = this.$('seed').value.trim() || '1', bestOf = +this.$('bestof').value;
+    this.matchId++;
+    this.cfg.slowShotsTo = this.playMode === 'bot' ? 0 : null;    // vs the bot, its shots to P1 fly slower
+    this.S = Sim.create(seed, bestOf, this.cfg, this.matchId);
+    const botP2 = this.playMode === 'bot';
+    this.bot.reset(); this.bot.setMode('play');
+    this.liveCtrls = [this.p1, botP2 ? this.bot : this.p2human];
+    this.setNames(botP2 ? 'bot' : 'human');
+    this.ctrls = this.liveCtrls; this.mode = 'live'; this.started = true; this.paused = false;
+    this.lastRally = null; this.rallyActions = []; this.acc = 0;
+    for (const id of ['start', 'warmup', 'pause', 'overlay']) this.$(id).classList.add('hidden');
+    this.$('replay-status').textContent = '';
+    this.processEvents();
+    const first = botP2 ? 'You serve first.' : `${this.names[0]} serves first.`;
+    this.banner(`New match: ${bestOf === 1 ? 'first to 21' : 'best of 3 games'}. ${first}` + (this.devFlag ? ` (seed "${seed}")` : ''));
+  },
+
+  setNames(mode) {
+    this.names = mode === 'bot' ? ['You', OPPONENT_NAME] : ['Player 1', 'Player 2'];
+    this.$('name0').textContent = this.names[0]; this.$('name1').textContent = this.names[1];
+    this.$('subtitle').textContent = mode === 'bot' ? `Singles · you vs ${OPPONENT_NAME}` : 'Singles · two players';
+    this.$('aicard').hidden = mode !== 'bot';
+    this.$('mind-row').hidden = mode !== 'bot';
+    this.$('court-btn').parentElement.hidden = false;
+  },
+  /** "You" reads as a person; everyone else is named. */
+  isYou(i) { return this.playMode === 'bot' && i === 0; },
+
+  botActive() { return this.ctrls[1] === this.bot; },
+
+  frame(ts) {
+    const dt = this.lastTs ? Math.min(0.1, (ts - this.lastTs) / 1000) : 0;
+    this.lastTs = ts;
+    if (this.started && !this.paused && !this.helpOpen) {
+      // Slow motion while the bot waits for TabPFN on something that matters now (never blocks rendering).
+      const thinking = () => this.mode === 'live' && this.botActive() && BOTCFG.slowmo.on && this.bot.isCritical();
+      this.acc += dt * (thinking() ? BOTCFG.slowmo.speed : 1);
+      let n = 0;
+      while (this.acc >= DT && n++ < 30) {
+        this.tick(); this.acc -= DT;
+        if (thinking()) { this.acc = Math.min(this.acc, DT * BOTCFG.slowmo.speed); break; }
+      }
+      this.thinking = thinking();
+      if (this.mode === 'live' && this.botActive() && TabPFNHealth.unavailable()) this.pauseUnavailable();
+    }
+    if (!Sim.someoneMustHit(this.S) || this.mode !== 'live') Input.click = null;   // no stale clicks
+    this.renderer.draw(this.S, { debug: Input.debug, selectedShot: Input.selectedShot, bot: this.botActive() ? this.bot : null,
+                                 botIdx: 1, mind: this.$('mind').checked, names: this.names });
+    this.updateUI();
+    requestAnimationFrame(t => this.frame(t));
+  },
+
+  tick() {
+    let env = null;
+    if (this.mode === 'replay') { const rc = this.ctrls[0]; env = rc.a[rc.k] ? rc.a[rc.k].env || null : null; }
+    else { env = this.pendingEnv; this.pendingEnv = null; }
+    const acts = Sim.step(this.S, this.ctrls, this.mode === 'replay' ? this.replayLogger : this.logger, env);
+    if (this.mode === 'live') this.rallyActions.push(acts);
+    this.processEvents();
+  },
+
+  processEvents() {
+    const evs = this.S.events; this.S.events = [];
+    for (const e of evs) {
+      if (e.type === 'rallyStart' && this.mode === 'live') {
+        this.rallySnap = Sim.snapshot(this.S); this.rallyActions = []; this.provStart = this.bot.providerLog.length;
+      } else if (e.type === 'point') {
+        if (this.mode === 'replay') { this.finishReplay(); return; }
+        if (this.mode !== 'live') continue;
+        this.lastRally = { snap: this.rallySnap, actions: this.rallyActions, matchId: this.S.matchId, rallyId: e.rallyId,
+                           providerLog: this.botActive() ? this.bot.providerLog.slice(this.provStart || 0) : [] };
+        this.banner(this.describePoint(e), 3500);
+      } else if (e.type === 'matchOver') this.showMatchOver();
+      else if (e.type === 'practiceShot') {
+        this.$('warm-bar').style.width = Math.round(100 * e.done / e.total) + '%';
+        this.$('warm-text').textContent = `${e.done} / ${e.total} practice shots`;
+      } else if (e.type === 'practiceDone') this.finishWarmup(false);
+    }
+  },
+
+  pauseUnavailable() {
+    this.paused = true;
+    const limited = TabPFNHealth.status() === 'rate-limited' || /limit/i.test(TabPFNHealth.lastError || '');
+    this.$('pause-text').textContent = limited
+      ? `${OPPONENT_NAME} has reached its usage limit for now. The game is paused; try again in a little while.`
+      : `The game is paused until ${OPPONENT_NAME} responds again. Check your connection and that the game server is running.`;
+    this.$('pause-detail').textContent = `${TabPFNClient.status} ${TabPFNHealth.lastError || ''} (no answer for over ${BOTCFG.unavailableMs / 1000} s; the bot never switches to another method)`;
+    this.$('pause').classList.remove('hidden');
+  },
+  async retryTabPFN() {
+    this.$('pause-text').textContent = `Reconnecting to ${OPPONENT_NAME}…`;
+    await TabPFNClient.health();
+    TabPFNHealth.reset(); this.bot.dynamics.retryAt = 0;
+    this.paused = false; this.$('pause').classList.add('hidden');
+  },
+
+  showGuardError(msg) {
+    if (!this.devFlag) return;                       // production: the guard silently refuses (the bot waits)
+    const el = this.$('guard-error');
+    el.hidden = false; el.textContent = 'Provenance guard: ' + msg;
+    clearTimeout(this.guardT); this.guardT = setTimeout(() => { el.hidden = true; }, 8000);
+  },
+
+  loadDevTools() {
+    if (this.devRequested) return;
+    this.devRequested = true;
+    const s = document.createElement('script');
+    s.src = 'dev-tools.js';
+    s.onload = () => window.DevTools && window.DevTools.init(this, this.$('dev-root'));
+    s.onerror = () => { this.$('dev-root').innerHTML = '<p class="muted">Could not load dev-tools.js (open the game through server.py).</p>'; };
+    document.head.appendChild(s);
+  },
+
+  contextExport() {
+    const b = this.bot, cps = BOTCFG.landing.checkpoints, cue = BOTCFG.landing.shotCue;
+    return {
+      note: 'Rows exactly as sent to TabPFN as in-context training data (no secrets).',
+      landing: cps.map((c, k) => ({ checkpoint: c, columns: LandingRows.names(k, cps, cue), targets: ['landing - last observed (x)', 'landing - last observed (y)', 'remaining flight time'],
+                                    rows: LandingRows.table(b.landing.entries, k, cps, cue).map(z => ({ x: z.x, y: z.y })) })),
+      dynamics: { columns: DynRows.names, targets: ['dvx', 'dvy'], rows: b.dynamics.trans.map(t => ({ x: DynRows.row(t), y: t.dv })) },
+      shot: { columns: ShotRows.names, targets: ['landing - target (x)', 'landing - target (y)'], rows: ShotRows.table(b.shots.own).items },
+      calibration: { landing90: b.landing.cov90.rate, dynamics90: b.dynamics.cov90.rate, shot90: b.shots.cov90.rate },
+    };
+  },
+
+  describePoint(e) {
+    const n = i => this.names[i], you = i => this.isYou(i), shot = e.isServe ? 'serve' : e.shotType;
+    const whose = i => (you(i) ? 'Your' : `${n(i)}'s`), H = e.hitter, R = 1 - e.hitter, W = e.winner;
+    const point = you(W) ? 'Your point.' : `Point to ${n(W)}.`;
+    let msg = {
+      fault: `${whose(H)} serve missed the service box. ${point}`,
+      out: `${whose(H)} ${shot} landed out. ${point}`,
+      net: `${whose(H)} ${shot} didn't cross the net. ${point}`,
+      winner: you(R) ? `You couldn't reach ${n(H)}'s ${shot}. ${point}`
+                     : `${n(R)} couldn't reach ${you(H) ? 'your' : `${n(H)}'s`} ${shot}. ${point}`,
+    }[e.reason];
+    const g = e.events.find(x => x.type === 'gameWon');
+    if (g) msg += ` Game ${g.gameIdx + 1} to ${you(g.winner) ? 'you' : n(g.winner)}, ${g.scores[g.winner]}–${g.scores[1 - g.winner]}.`;
+    if (e.events.some(x => x.type === 'switchEnds')) msg += ' Players switch ends.';
+    return msg;
+  },
+
+  matchTitle() {
+    const w = this.S.rules.matchWinner;
+    return this.isYou(w) ? 'You win the match!' : `${this.names[w]} wins the match`;
+  },
+
+  showMatchOver() {
+    const R = this.S.rules;
+    this.$('ov-title').textContent = this.matchTitle();
+    this.$('ov-body').innerHTML = '<p>' + R.history.map((s, i) => `Game ${i + 1}: ${this.names[0]} ${s[0]} – ${s[1]} ${this.names[1]}`).join('<br>') + '</p>';
+    this.$('overlay').classList.remove('hidden');
+  },
+
+  startReplay() {
+    if (this.mode !== 'live' || !this.lastRally || !this.lastRally.snap) { this.$('replay-status').textContent = 'No point to replay yet.'; return; }
+    if (!['serve', 'dead', 'over'].includes(this.S.phase)) { this.$('replay-status').textContent = 'You can replay once this point is over.'; return; }
+    this.savedNow = Sim.snapshot(this.S); this.savedActions = this.rallyActions;
+    this.S = Sim.restore(this.lastRally.snap);
+    this.replayLogger = new ShotLogger();
+    // Replays use the recorded actions (and recorded provider outputs): no new TabPFN calls.
+    this.ctrls = [new ReplayController(this.lastRally.actions, 0), new ReplayController(this.lastRally.actions, 1)];
+    this.mode = 'replay';
+    this.$('overlay').classList.add('hidden');
+    this.$('replay-status').textContent = 'Replaying the last point…';
+  },
+
+  finishReplay() {
+    const lr = this.lastRally;
+    const orig = this.logger.records.filter(r => r.matchId === lr.matchId && r.rallyId === lr.rallyId);
+    const same = orig.length > 0 && JSON.stringify(orig) === JSON.stringify(this.replayLogger.records);
+    this.S = Sim.restore(this.savedNow); this.rallyActions = this.savedActions;
+    for (const k of Object.keys(SETTINGS)) this.S.pendingCfg[k] = this.cfg[k];
+    this.ctrls = this.liveCtrls; this.mode = 'live';
+    const txt = !this.devFlag ? 'Replay finished.'
+      : same ? `Replay identical ✓ (${orig.length} shots, ${lr.providerLog.length} recorded provider outputs)` : 'Replay differs ✗';
+    this.$('replay-status').textContent = txt;
+    this.banner(txt);
+    if (this.S.phase === 'over') this.showMatchOver();
+  },
+
+  banner(text, ms = 2500) {
+    const b = this.$('banner'); b.textContent = text; b.classList.add('show');
+    clearTimeout(this.bannerT); this.bannerT = setTimeout(() => b.classList.remove('show'), ms);
+  },
+
+  updateUI() {
+    const S = this.S, R = S.rules, set = (id, v) => { const el = this.$(id); if (el.textContent !== String(v)) el.textContent = v; };
+    for (const i of [0, 1]) {
+      set('s' + i, R.scores[i]); set('g' + i, R.games[i]);
+      this.$('srv' + i).classList.toggle('on', R.server === i && S.phase !== 'over' && !S.practice && this.started);
+    }
+    const n = i => this.names[i], you = i => this.isYou(i), secs = t => Math.max(0, t * DT).toFixed(1);
+    set('gameinfo', S.practice ? 'Warm-up (no scoring)' : !this.started ? '' : R.over ? this.matchTitle() :
+      `Game ${R.gameIdx + 1}${R.bestOf > 1 ? ' of 3' : ''} · ${R.ends[0] > 0 ? `${n(0)} at the bottom` : `${n(0)} at the top`}`);
+    let hint = '';
+    if (this.helpOpen) hint = 'Paused. Press H or Esc to continue.';
+    else if (!this.started) hint = 'Choose a mode to start. Press H for how to play.';
+    else if (S.practice) hint = `${OPPONENT_NAME} is warming up…`;
+    else if (S.phase === 'serve') {
+      const sv = R.server, court = R.scores[sv] % 2 === 0 ? 'right' : 'left';
+      hint = this.ctrls[sv] === this.bot ? `${n(sv)} is serving…`
+        : `${you(sv) ? 'Your' : `${n(sv)}'s`} serve from the ${court} court: click a spot in the shaded box (auto in ${secs(S.phaseEndTick - S.tick)} s).`;
+    } else if (S.phase === 'flight') {
+      const rc = S.shot.receiver;
+      hint = this.ctrls[rc] === this.bot ? `${n(rc)} is chasing the shuttle…` : you(rc) ? 'Get to where the shuttle will land!' : `${n(rc)}, get to the shuttle!`;
+    } else if (S.phase === 'aim') {
+      const a = S.aim.player;
+      hint = this.ctrls[a] === this.bot ? `${n(a)} is choosing its shot…`
+        : `${you(a) ? 'Your' : `${n(a)}'s`} shot: pick 1 Clear · 2 Drop · 3 Smash and click where to send it (${secs(S.aim.endTick - S.tick)} s).`;
+    } else if (S.phase === 'dead' && S.lastPoint) hint = this.describePoint(S.lastPoint);
+    else if (S.phase === 'over') hint = `${this.matchTitle()} Press New match to play again.`;
+    if (this.mode === 'replay') hint = 'Replay: ' + hint;
+    set('hint', hint);
+    const tag = this.$('mode-tag');
+    tag.style.display = this.mode === 'replay' || this.thinking ? 'block' : 'none';
+    tag.classList.toggle('think', this.mode !== 'replay');
+    set('mode-tag', this.mode === 'replay' ? 'REPLAY' : `${OPPONENT_NAME} is predicting…`);
+    set('logcount', `${this.logger.records.length} shots in the log.`);
+    this.$('replay').disabled = this.mode !== 'live';
+    this.$('court-btn').textContent = S.env.slippery ? 'Court is slippery: restore grip' : 'Make the court slippery';
+    this.$('court-btn').classList.toggle('on', S.env.slippery);
+
+    // --- bot status (play mode shows only status, counters, the 100 % TabPFN indicator, calibration) ---
+    const b = this.bot, st = TabPFNHealth.status(), badge = this.$('tp-badge');
+    this.$('aicard').hidden = !this.botActive();      // only while playing against TabPFN-3.5
+    this.$('mind-row').hidden = !this.botActive();
+    badge.className = 'badge ' + ({ connected: 'ok', slow: 'warn', unavailable: 'bad', idle: '' }[st] || '');
+    set('tp-badge', `TabPFN: ${st}`);
+    const pure = Guard.mode === 'play';
+    this.$('pure').className = 'badge ' + (pure ? 'pure' : 'bad');
+    set('pure', pure ? `100% TabPFN${Guard.rejected ? ` · ${Guard.rejected} refused` : ''}` : 'DEV providers active (session only)');
+    const pc = v => (v === null ? '–' : Math.round(v * 100) + '%');
+    set('calib', `90% coverage: landing ${pc(b.landing.cov90.rate)} · moves ${pc(b.dynamics.cov90.rate)}`);
+    const stateTxt = !this.botActive() ? (this.playMode === 'human' ? 'Hotseat: no bot.' : 'Bot idle.')
+      : b.mode === 'warmup' ? 'Warm-up: exploring with random moves (no predictions yet).'
+      : b.status === 'late' ? 'TabPFN late: following the previous TabPFN plan.'
+      : b.status === 'waiting' ? 'TabPFN slow: bot is waiting.'
+      : b.status === 'ok' ? 'Planning with CEM on TabPFN predictions.' : 'Ready.';
+    set('bot-state', stateTxt);
+    // Player-facing status line
+    const busy = b.status === 'waiting' || this.thinking;
+    const [dot, label] = !this.botActive() ? ['', ''] :
+      b.mode === 'warmup' ? ['warn', `${OPPONENT_NAME} is warming up`] :
+      st === 'unavailable' ? ['bad', `${OPPONENT_NAME} is offline`] :
+      st === 'rate-limited' ? ['warn', `${OPPONENT_NAME} is busy, retrying`] :
+      st === 'slow' ? ['warn', `${OPPONENT_NAME} is responding slowly`] :
+      busy ? ['ok', `${OPPONENT_NAME} is predicting…`] : ['ok', `${OPPONENT_NAME} is ready`];
+    this.$('ai-dot').className = 'status-dot ' + dot;
+    set('ai-status', label);
+    const conf = b.plan && b.plan.pHit != null ? b.plan.pHit : null;
+    this.$('conf-bar').style.width = conf === null ? '0%' : Math.round(conf * 100) + '%';
+    set('conf-text', conf === null ? '–' : Math.round(conf * 100) + '%');
+    set('tp-counts', `${Guard.counters.landing} / ${Guard.counters.dynamics} / ${Guard.counters.shot} · ≈${Math.round(CallLog.apiCalls * BOTCFG.tokensPerCall / 1000)}k tokens`);
+    set('tp-lat', `${TabPFNHealth.lastMs === null ? '–' : TabPFNHealth.lastMs + ' ms'} · ${b.replanMs == null ? '–' : b.replanMs.toFixed(1) + ' ms'}`);
+    set('tp-late', `${b.stats.late} · ${TabPFNHealth.failed}`);
+    const c = b.contextSizes();
+    set('tp-ctx', `${c.landing} / ${c.dynamics} / ${c.shot}`);
+    const low = this.botActive() && b.mode === 'play' && b.lowContext(), L = BOTCFG.lowContext;
+    this.$('lowctx').hidden = !low;
+    if (low) set('lowctx', this.devFlag
+      ? `Low context: landing ${c.landing}/${L.landing}, moves ${c.dynamics}/${L.dynamics}, own shots ${c.shot}/${L.shot}. Predictions may be poor; the bot keeps collecting.`
+      : `${OPPONENT_NAME} is still learning this court and gets better as you play.`);
+  },
+
+  download(name, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = document.createElement('a'); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
+
+  async showSelfTest() {
+    const res = await SelfTest.runAll();
+    // Test mode only: also run the developer-module checks (fixtures live in dev-tools.js, never in play).
+    await new Promise(done => { const sc = document.createElement('script'); sc.src = 'dev-tools.js'; sc.onload = sc.onerror = done; document.head.appendChild(sc); });
+    if (window.DevTools) { const saved = SelfTest.saveCounters(); res.push(...await window.DevTools.selfTest()); SelfTest.restoreCounters(saved); }
+    const pass = res.filter(r => r.ok).length;
+    console.table(res);
+    this.$('ov-title').textContent = `Self-test: ${pass}/${res.length} passed`;
+    this.$('ov-body').innerHTML = '<pre>' + res.map(r => (r.ok ? '✓ ' : '✗ ') + r.name).join('\n') + '</pre>';
+    this.$('overlay').classList.remove('hidden');
+  },
+};
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined' && document.getElementById('court')) App.init();
+</script>
+</body>
+</html>

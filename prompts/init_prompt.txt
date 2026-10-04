@@ -1,0 +1,53 @@
+# Task: Browser-based 2D badminton (singles), built in two phases
+
+## Goal
+Build a top-down 2D badminton game that runs entirely in the browser (one HTML file, canvas, no external dependencies). This is Phase 1: two humans on one device. In Phase 2, Player 2 will be replaced by a bot that uses a tabular model (TabPFN) for model predictive control. Phase 1 must therefore be built so that swap is easy. Do NOT implement any bot or ML in Phase 1.
+
+## Architecture requirements (these make Phase 2 possible)
+- Separate modules: physics (pure functions, no drawing), rules (scoring, serving, faults), renderer, input, and a Controller interface.
+- Every player is driven by a Controller with: observe(observation) and act() returning {move: vector, hit?: {target, shotType}}. Phase 1 has HumanController instances; Phase 2 adds an async BotController without changing the game loop.
+- Controllers receive only an OBSERVATION, never the true state: the noisy shuttle position sampled at fixed intervals (e.g. every 50 ms), plus own and opponent positions. True wind and true landing point stay hidden from controllers.
+- Seeded random number generator so any rally can be replayed exactly.
+- A shot logger that records, for every shot: shot type, intended target, hitter position, the observed noisy trajectory samples, true landing point, wind values, in/out result, and rally outcome. Provide a "Download shots as CSV/JSON" button. This becomes the context data for the model in Phase 2.
+- A debug toggle that draws the true wind, the true landing point and the noisy observed trail.
+
+## Court and rules (singles, standard)
+- Top-down view, net across the middle, court drawn to real proportions (13.4 m long, 5.18 m wide for singles), with short service line (1.98 m from the net) and center line.
+- Rally scoring: first to 21, win by 2, cap at 30. Configurable: single game or best of 3. Winner of a rally serves next. Players switch ends after each game.
+- Player 1 (human) always serves first.
+- Serve rules: the server stands in the right service court when their score is even and the left when odd, and serves diagonally. The serve must land inside the diagonal service box (for singles, between the short service line and the back boundary, within the singles sidelines). Landing outside it is a fault and the point goes to the receiver.
+- Rally rules: a shuttle landing outside the opponent's half is OUT and the hitter loses the point. A shuttle landing in bounds that the opponent cannot reach wins the point for the hitter.
+- Show the scoreboard, who serves, and a clear message after every point.
+
+## Controls (Phase 1, hotseat)
+- Movement: Player 1 uses WASD and Player 2 uses the arrow keys, with a maximum speed and some acceleration.
+- Aiming: the player whose turn it is to hit clicks a target point in the opponent's half with the mouse and picks a shot type (clear, drop, smash, with hotkeys or buttons). Show a faint landing-zone marker and the court area in which the shot is valid.
+
+## Shuttle mechanics
+- Top-down view, with height z simulated internally and shown as a growing shadow or size cue.
+- Flight time and noise depend on shot type. Suggested defaults, to be tunable in a config object:
+  - clear: long flight, medium noise
+  - drop: short, slow flight, low noise
+  - smash: very fast, short flight, high noise
+  - serve: fixed, low flight
+- Realism within reason: drag, a wind vector that varies slowly over time and across the court (gusts), and random landing noise (Gaussian). The player aims at a target, and the actual landing point is the target plus wind drift plus noise.
+- The shuttle trajectory is animated from the hitter to the true landing point over the flight time.
+
+## Hitting and reach
+- A player can return the shuttle only if they are within radius r of the true landing point when the shuttle arrives. Config: r, max player speed, flight times.
+- When the shuttle arrives and the receiver is within r, the game enters a short aim phase (default 2 s, then auto-plays a default shot) where the receiver picks a target and shot type.
+- Players can move while the shuttle is in flight. Add a small recovery delay after hitting.
+
+## UI
+- Clean top-down court, scoreboard, serve indicator, shot-type buttons, restart button, and a settings panel with sliders for wind strength, noise, reach radius r and player speed.
+- Works on a laptop browser. Keep text sizes readable and respect the light/dark system theme.
+
+## Phase 2 (do not build yet, but keep the design compatible)
+Player 2 becomes a BotController. At fixed checkpoints during the flight (e.g. 0.2 s, 0.4 s, 0.6 s after the hit) it formats the observed noisy trajectory so far into one tabular row (features such as early positions, velocities, time since hit, shot-type cues, current bot position) and asks TabPFN to predict the landing point and its uncertainty. It then moves toward the predicted landing point and, if within r, chooses a return shot by sampling candidate (target, shot type) options, scoring each with the model's predicted landing distribution and the opponent's weakness, and picking the best (the model-predictive-control step). It learns from the logged shots as in-context examples and adapts when the wind changes. Note that TabPFN does not run natively in a browser, so Phase 2 will need a small backend or API; the async BotController interface above is meant to absorb that.
+
+## Deliverables and acceptance checks
+1. One HTML file that runs offline in a browser.
+2. A complete game can be played to the end by two humans, with correct scoring, serving side, faults, and end-of-game handling.
+3. Replaying the same seed produces the same rally.
+4. The shot log downloads and contains the fields listed above.
+5. Short comments marking where the Phase 2 BotController plugs in.
