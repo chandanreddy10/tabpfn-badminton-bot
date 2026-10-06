@@ -4,7 +4,7 @@ For the TabPFN-3.5 Hackathon I built a badminton-playing bot that runs on TabPFN
 
 ![TabPFN-3.5 playing a sparring robot while the shuttle world changes](demo/demo.gif)
 
-**Try it without installing anything:** download [`demo/index.html`](demo/index.html) and open it in a browser (or open `/demo/` on the repo's GitHub Pages site). It's a single file holding a recorded match. Every prediction you see was made live by TabPFN-3.5, and it's replayed without a server. There's also an [80-second video](demo/demo.mp4) of the same match.
+**Try it without installing anything:** [chandanreddy10.github.io/tabpfn-badminton-bot](https://chandanreddy10.github.io/tabpfn-badminton-bot/) plays a recorded match in your browser. Every prediction you see was made live by TabPFN-3.5, and it's replayed without a server. There's also an [80-second video](https://chandanreddy10.github.io/tabpfn-badminton-bot/demo.mp4) of the same match. The demo is a single file, [`demo/index.html`](demo/index.html), which you can also download and open directly.
 
 Playing badminton is mostly a series of small prediction problems, made under time pressure, and each one fits naturally into a table:
 - where is this shot going to land,
