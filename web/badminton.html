@@ -122,6 +122,11 @@
     background: var(--bad); color: #fff; font-weight: 700; font-size: 15px; }
   details.card > summary { font-size: 15px; }
   .small-note { font-size: 13px; }
+  body.demo .no-demo { display: none !important; }
+  #learn-chart { display: block; width: 100%; height: 150px; margin-top: 6px; }
+  .lg { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
+  .lg-land { background: var(--p2); }
+  .lg-ant { border: 1.5px solid var(--muted); }
   #dev-root table { font-size: 13px; border-collapse: collapse; width: 100%; }
   #dev-root td, #dev-root th { padding: 2px 4px; text-align: left; border-bottom: 1px solid var(--panel-border); }
   #dev-root h3 { font-size: 14px; margin: 14px 0 6px; } #dev-root h4 { font-size: 13px; margin: 10px 0 4px; }
@@ -154,8 +159,9 @@
     <div id="start" class="screen">
       <div class="card start-card">
         <h2>Badminton</h2>
-        <p class="muted">Singles against TabPFN-3.5, an opponent that learns the court as you play.</p>
-        <button id="start-bot" class="primary big">Play vs TabPFN-3.5</button>
+        <p class="muted">Singles against <span class="opp-name">TabPFN-3.5</span>, an opponent that learns the court as you play.</p>
+        <button id="start-bot" class="primary big">Play vs <span class="opp-name">TabPFN-3.5</span></button>
+        <button id="start-watch" class="big">Watch <span class="opp-name">TabPFN-3.5</span> learn</button>
         <button id="start-hotseat" class="big">Two players, one keyboard</button>
         <p id="start-status" class="notice" hidden></p>
         <p class="muted small-note">Press <kbd>H</kbd> at any time for how to play.</p>
@@ -164,8 +170,8 @@
 
     <div id="warmup" class="screen hidden">
       <div class="card start-card">
-        <h2>Getting TabPFN-3.5 ready…</h2>
-        <p class="muted">TabPFN-3.5 practises a few shots to learn the court. This takes about a minute.</p>
+        <h2>Getting <span class="opp-name">TabPFN-3.5</span> ready…</h2>
+        <p class="muted"><span class="opp-name">TabPFN-3.5</span> practises a few shots to learn the court. This takes about a minute.</p>
         <div class="meter"><div id="warm-bar"></div></div>
         <p id="warm-text" class="muted">0 / 30 practice shots</p>
         <button id="warm-skip">Skip</button>
@@ -174,8 +180,8 @@
 
     <div id="pause" class="screen hidden">
       <div class="card start-card">
-        <h2>Connection to TabPFN-3.5 lost</h2>
-        <p id="pause-text" class="muted">The game is paused until TabPFN-3.5 responds again.</p>
+        <h2>Connection to <span class="opp-name">TabPFN-3.5</span> lost</h2>
+        <p id="pause-text" class="muted">The game is paused until <span class="opp-name">TabPFN-3.5</span> responds again.</p>
         <button id="pause-retry" class="primary big">Retry</button>
         <p id="pause-detail" class="muted small-note dev-only"></p>
       </div>
@@ -207,8 +213,8 @@
             <p>Every rally scores a point. A shot that lands out, a serve outside the box, or a shot nobody reaches gives the point to the other side. First to 21, win by 2, capped at 30. The rally winner serves next.</p>
           </section>
           <section>
-            <h3>Your opponent: TabPFN-3.5</h3>
-            <p>It warms up briefly before your first match and keeps learning while you play. Its shots fly slower to give you time to react. The game slows down for a moment while TabPFN-3.5 is predicting.</p>
+            <h3>Your opponent: <span class="opp-name">TabPFN-3.5</span></h3>
+            <p>It warms up briefly before your first match and keeps learning while you play. Its shots fly slower to give you time to react. The game slows down for a moment while <span class="opp-name">TabPFN-3.5</span> is predicting.</p>
           </section>
         </div>
         <button id="help-close" class="primary big">Start playing</button>
@@ -231,7 +237,7 @@
   <aside id="panel" aria-label="Match panel">
     <h1>Badminton</h1>
     <p class="sub" id="subtitle">Singles</p>
-    <div class="theme-row" role="radiogroup" aria-label="Colour theme">
+    <div class="theme-row no-demo" role="radiogroup" aria-label="Colour theme">
       <span class="label">Theme</span>
       <button class="swatch" role="radio" data-palette="classic" title="Classic" aria-label="Classic theme" style="background: linear-gradient(135deg, #3f8a5a 50%, #2563eb 50%)"></button>
       <button class="swatch" role="radio" data-palette="midnight" title="Midnight" aria-label="Midnight theme" style="background: linear-gradient(135deg, #1d2266 50%, #8b6cff 50%)"></button>
@@ -254,9 +260,39 @@
 
     <section class="card" id="aicard">
       <div class="ai-head"><span id="ai-dot" class="status-dot"></span><b id="ai-status">TabPFN-3.5 ready</b></div>
-      <div class="kvline"><span>TabPFN-3.5 confidence</span><div class="meter small"><div id="conf-bar"></div></div><span id="conf-text">–</span></div>
+      <div class="kvline"><span><span class="opp-name">TabPFN-3.5</span> confidence</span><div class="meter small"><div id="conf-bar"></div></div><span id="conf-text">–</span></div>
       <p id="lowctx" class="notice" hidden></p>
-      <p class="muted small-note">Every prediction TabPFN-3.5 makes comes from the TabPFN model.</p>
+      <p class="muted small-note no-demo">Every prediction <span class="opp-name">TabPFN-3.5</span> makes comes from the TabPFN model.</p>
+      <p id="demo-note" class="notice" hidden></p>
+      <div id="tp-switch" class="no-demo">
+        <label class="inline">Model
+          <select id="tp-sel-model" title="Which TabPFN checkpoint the opponent uses (huggingface.co/Prior-Labs/tabpfn_3_5). The game pauses while it loads."></select>
+        </label>
+        <label class="inline dev-only">Inference
+          <select id="tp-sel-backend">
+            <option value="local">Local (this machine)</option>
+            <option value="api">Prior Labs API (TabPFN-3.5)</option>
+          </select>
+        </label>
+        <p id="tp-switch-status" class="muted small-note dev-only"></p>
+      </div>
+      <div id="world-ctl" class="no-demo">
+        <label class="inline">Shuttle world <select id="world-sel" title="Changes how the shuttle flies from the next rally. TabPFN-3.5 is not told."></select></label>
+        <label class="inline">Change world
+          <select id="world-every"><option value="0">Never</option><option value="5">Every 5 rallies</option><option value="10">Every 10 rallies</option></select>
+        </label>
+        <div id="watch-ctl" hidden>
+          <label class="inline">Robot style <select id="style-sel" title="How the sparring robot chooses its shots"></select></label>
+          <label class="inline">Change style
+            <select id="style-every"><option value="0">Never</option><option value="6">Every 6 rallies</option><option value="10">Every 10 rallies</option></select>
+          </label>
+          <label class="inline">Speed
+            <select id="watch-speed" title="Plays faster to collect examples sooner. The game still slows down while TabPFN-3.5 is predicting.">
+              <option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select>
+          </label>
+        </div>
+        <p id="world-desc" class="muted small-note"></p>
+      </div>
       <div class="dev-only">
         <div class="row tight">
           <span id="tp-badge" class="badge">TabPFN: idle</span>
@@ -265,6 +301,7 @@
         </div>
         <p id="bot-state" class="hint"></p>
         <table class="kv">
+          <tr><td>Model · inference · device</td><td id="tp-model">–</td></tr>
           <tr><td>TabPFN calls (landing / dynamics / shot)</td><td id="tp-counts">0 / 0 / 0</td></tr>
           <tr><td>Last call latency · replan latency</td><td id="tp-lat">–</td></tr>
           <tr><td>Late · failed calls</td><td id="tp-late">0 · 0</td></tr>
@@ -273,7 +310,15 @@
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" id="learncard" hidden>
+      <div class="ai-head"><b><span class="opp-name">TabPFN-3.5</span> is learning</b></div>
+      <canvas id="learn-chart" aria-label="Prediction error per shot"></canvas>
+      <p class="muted small-note"><span class="lg lg-land"></span>landing error per shot, line = average of the last 8 ·
+        <span class="lg lg-ant"></span>error of its guess where the next shot goes · dashed line = new shuttle world</p>
+      <p id="learn-stats" class="small-note"></p>
+    </section>
+
+    <section class="card no-demo">
       <div class="seg" id="shotbtns" role="group" aria-label="Shot type">
         <button data-shot="clear">Clear <kbd>1</kbd></button>
         <button data-shot="drop">Drop <kbd>2</kbd></button>
@@ -287,11 +332,11 @@
       <div class="row">
         <button id="court-btn">Make the court slippery</button>
       </div>
-      <label class="check" id="mind-row"><input type="checkbox" id="mind"> Show TabPFN-3.5's planned path</label>
+      <label class="check" id="mind-row"><input type="checkbox" id="mind"> Show <span class="opp-name">TabPFN-3.5</span>'s planned path</label>
       <p id="replay-status" class="muted small-note"></p>
     </section>
 
-    <details class="card">
+    <details class="card no-demo">
       <summary>Settings</summary>
       <label class="inline">Match format
         <select id="bestof"><option value="1">Single game</option><option value="3">Best of 3</option></select>
@@ -311,15 +356,15 @@
         <input type="range" id="grip" min="0.2" max="1.5" step="0.05"></div>
       <div class="slider"><span>Input delay</span><output id="o-lag"></output>
         <input type="range" id="lag" min="0" max="0.3" step="0.025"></div>
-      <div class="slider"><span>TabPFN-3.5's shots fly slower by</span><output id="o-botShotSlowdown"></output>
+      <div class="slider"><span><span class="opp-name">TabPFN-3.5</span>'s shots fly slower by</span><output id="o-botShotSlowdown"></output>
         <input type="range" id="botShotSlowdown" min="1" max="4" step="0.25"></div>
-      <label class="check"><input type="checkbox" id="slowmo" checked> Slow the game down while TabPFN-3.5 is predicting</label>
+      <label class="check"><input type="checkbox" id="slowmo" checked> Slow the game down while <span class="opp-name">TabPFN-3.5</span> is predicting</label>
       <div class="slider"><span>Slow-down speed</span><output id="o-slowspeed"></output>
         <input type="range" id="slowspeed" min="0.02" max="0.5" step="0.01"></div>
       <label class="inline dev-only">Seed <input id="seed" type="text" spellcheck="false"></label>
     </details>
 
-    <details class="card">
+    <details class="card no-demo">
       <summary>Your data</summary>
       <p class="muted small-note">Everything stays in this browser. The shot log records every shot of this session.</p>
       <div class="row">
@@ -328,7 +373,7 @@
       </div>
       <div class="row">
         <button id="clearlog">Clear shot log</button>
-        <button id="reset-bot">Reset what TabPFN-3.5 learned</button>
+        <button id="reset-bot">Reset what <span class="opp-name">TabPFN-3.5</span> learned</button>
       </div>
       <p id="logcount" class="muted small-note"></p>
       <div class="dev-only">
@@ -348,7 +393,7 @@
     </details>
 
     <details class="card dev-only">
-      <summary>What TabPFN-3.5 sees and how it decides</summary>
+      <summary>What <span class="opp-name">TabPFN-3.5</span> sees and how it decides</summary>
       <ul class="small">
         <li><b>Observation (every tick):</b> own position, velocity and previous command; opponent position and velocity; phase; whether it must hit; valid zones; score; reach, speed limit, court size, nominal shot timing.</li>
         <li><b>During a flight:</b> shot type cue, time since the hit, noisy shuttle samples every 50 ms. <b>After landing:</b> where it landed and the flight time. Never wind, noise, or the landing before it lands.</li>
@@ -408,6 +453,34 @@ const DEFAULT_CONFIG = {
 };
 // "Slippery court / tired legs": applied mid-rally through a recorded env event (replay-safe).
 const COURT_CHANGE = { grip: 0.35, speedMult: 0.75 };
+// Shuttle worlds: hidden changes to how the shuttle flies (multipliers on the default shot parameters, plus
+// the wind). The bot is never told the world: Observation keeps publishing the DEFAULT timing law, so
+// TabPFN-3.5 has to learn each world from the shots it sees. Applied at rally start (part of the snapshot).
+const WORLDS = {
+  normal:  { name: 'Normal', desc: 'The standard shuttle and wind' },
+  heavy:   { name: 'Heavy shuttle', desc: 'Fast and flat, barely moved by the wind',
+             shots: { baseTime: 0.8, perMeter: 0.8, drift: 0.4, dragK: 0.6, arc: 0.85 } },
+  feather: { name: 'Feather shuttle', desc: 'Slow, drifts a lot and stalls early',
+             shots: { baseTime: 1.3, perMeter: 1.3, drift: 2.2, dragK: 1.5, noise: 1.3 } },
+  moon:    { name: 'Low gravity', desc: 'Long, high, floating flights', shots: { baseTime: 1.6, perMeter: 1.4, arc: 1.8 } },
+  gale:    { name: 'Steady gale', desc: 'A strong wind from one direction, no gusts', windMult: 2.5, windGust: 0 },
+  storm:   { name: 'Gusty storm', desc: 'Sudden gusts that change across the court', windMult: 1.5, windGust: 2.5 },
+};
+const Worlds = {
+  keys: Object.keys(WORLDS),
+  /** A copy of cfg in world `key`: shot parameters rebuilt from the defaults and scaled; user settings kept. */
+  apply(cfg, key) {
+    const w = WORLDS[key] || WORLDS.normal, c = JSON.parse(JSON.stringify(cfg));
+    c.world = WORLDS[key] ? key : 'normal';
+    c.shots = JSON.parse(JSON.stringify(DEFAULT_CONFIG.shots));
+    for (const sp of Object.values(c.shots)) for (const [p, m] of Object.entries(w.shots || {})) sp[p] = Math.round(sp[p] * m * 1e4) / 1e4;
+    c.windMult = w.windMult ?? 1; c.windGust = w.windGust ?? 1;
+    return c;
+  },
+  windStrength: cfg => cfg.windStrength * (cfg.windMult ?? 1),
+  gust: cfg => cfg.windGust ?? 1,
+  name: key => (WORLDS[key] || WORLDS.normal).name,
+};
 const KEYMAP_P1 = { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD' };
 const KEYMAP_P2 = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 
@@ -456,12 +529,13 @@ const Wind = {
     });
     return { bx: mag * Math.cos(ang), by: mag * Math.sin(ang), slow, gusts };
   },
-  at(P, strength, x, y, t) {
+  /** gust (default 1) scales the travelling gust pulses; shuttle worlds use it for a steady gale (0) or a storm. */
+  at(P, strength, x, y, t, gust = 1) {
     let wx = P.bx + P.slow[0].amp * Math.sin(P.slow[0].w * t + P.slow[0].ph);
     let wy = P.by + P.slow[1].amp * Math.sin(P.slow[1].w * t + P.slow[1].ph);
     for (const g of P.gusts) {
       const s = Math.sin(g.kx * x + g.ky * y - g.w * t + g.ph);
-      const a = s > 0 ? g.amp * s * s : 0;
+      const a = s > 0 ? gust * g.amp * s * s : 0;
       wx += a * g.dx; wy += a * g.dy;
     }
     return { x: wx * strength, y: wy * strength };
@@ -480,7 +554,7 @@ const Physics = {
     let mx = 0, my = 0; const N = 8;              // mean wind along the nominal path
     for (let i = 0; i < N; i++) {
       const u = (i + 0.5) / N;
-      const w = Wind.at(windP, cfg.windStrength, from.x + (target.x - from.x) * u, from.y + (target.y - from.y) * u, t0 + u * T);
+      const w = Wind.at(windP, Worlds.windStrength(cfg), from.x + (target.x - from.x) * u, from.y + (target.y - from.y) * u, t0 + u * T, Worlds.gust(cfg));
       mx += w.x / N; my += w.y / N;
     }
     const drift = { x: mx * T * sp.drift, y: my * T * sp.drift };   // drag-damped drift
@@ -489,7 +563,7 @@ const Physics = {
     return {
       type, t0, T, from: { x: from.x, y: from.y }, target: { x: target.x, y: target.y }, drift, noise,
       landing: { x: target.x + drift.x + noise.x, y: target.y + drift.y + noise.y },
-      windAtHit: Wind.at(windP, cfg.windStrength, from.x, from.y, t0), meanWind: { x: mx, y: my },
+      windAtHit: Wind.at(windP, Worlds.windStrength(cfg), from.x, from.y, t0, Worlds.gust(cfg)), meanWind: { x: mx, y: my },
       h0: sp.h0, arc: sp.arc, k: sp.dragK,
     };
   },
@@ -620,7 +694,8 @@ const Observation = {
     const lastLanding = ll ? { shotId: ll.shotId, hitter: ll.hitter, shotType: ll.shotType, isServe: ll.isServe,
       x: r4(ll.x), y: r4(ll.y), tArrival: ll.tArrival, outcome: ll.outcome, target: ll.hitter === i ? ll.target : null } : null;
     const shotTiming = {};
-    for (const k of SHOT_KINDS) { const s = cfg.shots[k]; shotTiming[k] = { baseTime: s.baseTime, perMeter: s.perMeter, dragK: s.dragK }; }
+    // The DEFAULT timing law, whatever the shuttle world: the bot is never told which world it is in.
+    for (const k of SHOT_KINDS) { const s = DEFAULT_CONFIG.shots[k]; shotTiming[k] = { baseTime: s.baseTime, perMeter: s.perMeter, dragK: s.dragK }; }
     return {
       t: r4(S.tick * DT), me: i, side: me.side, phase: S.phase, self: selfObs, opponent: pub(op),
       mustHit, aimTimeLeft, validZones, incoming, lastLanding,
@@ -628,7 +703,7 @@ const Observation = {
       server: S.rules.server,
       // Public "laws of the game": court size and nominal shot timing / drag. Wind and noise stay hidden.
       params: { reach: cfg.reach, maxSpeed: cfg.playerSpeed, accel: cfg.accel, obsInterval: cfg.obsInterval, aimTime: cfg.aimTime,
-                oppReceiveTimeScale: cfg.slowShotsTo === 1 - i ? cfg.botShotSlowdown : 1,
+                oppReceiveTimeScale: cfg.slowShotsTo === 1 - i ? (cfg.slowShotsFactor || cfg.botShotSlowdown) : 1,
                 court: { halfLen: COURT.halfLen, singlesHalfW: COURT.singlesHalfW, shortService: COURT.shortService }, shotTiming },
     };
   },
@@ -686,12 +761,15 @@ class ReplayController {
 // dev-tools.js (loaded on demand) and are refused here by ProvenanceGuard.
 // =====================================================================
 const BOTCFG = {
-  landing: { checkpoints: [0.2, 0.4, 0.6], window: 120, minRows: 10, shotCue: true },
+  // ageFeature: each context row also gets "shots ago" (the query is 0), so TabPFN can weigh recent shots more
+  // after a change. Adopted from experiment X2 (experiments/REPORT.md): recovery after a world switch 22 -> 14 shots.
+  landing: { checkpoints: [0.2, 0.4, 0.6], window: 120, minRows: 10, shotCue: true, ageFeature: true },
   dynamics: { window: 300, windowSec: 90, minRows: 30, refitFrac: 0.25, dedupEps: 0.03, retryMs: 2000,
               gridV: 5, gridU: 5,            // TabPFN surrogate grid: 5x5 velocities x 5x5 commands = 625 rows, 1 call
               minRefreshMs: 6000,            // at most one surrogate refresh per 6 s (API rate limit)
               ttlMs: 20000 },                // a surrogate older than this (no successful refresh) counts as late
   shot: { window: 100, minRows: 6, candidatesPerType: 8, serveCandidates: 12, epsilon: 0.1 },
+  anticipation: { window: 60, minRows: 6, within: 1.5 },   // where the opponent hits next (display only)
   mpc: {
     planner: 'cem', N: 48, elites: 8, iters: 4, H: 12, dt: 0.1, S: 8, p: 0.9, sigma0: 0.6,
     linearize: true,            // false = strict per-step TabPFN rollout (slow: H sequential batched calls per plan)
@@ -767,11 +845,13 @@ const TabPFNHealth = {
   },
 };
 /** Client-side budget for the API's per-minute predict limit (each target is one request).
- *  Critical calls (landing, own shot) may use everything; dynamics refreshes leave a reserve. */
+ *  Critical calls (landing, own shot) may use everything; dynamics refreshes leave a reserve.
+ *  Local inference has no limit, so the budget only applies while the server uses the API. */
 const RateBudget = {
   log: [], blockedUntil: 0, deferred: 0,
   used() { const t = Clock.now() - 60000; while (this.log.length && this.log[0] < t) this.log.shift(); return this.log.length; },
   take(units, priority) {
+    if (!TabPFNClient.rateLimited) return true;
     const R = BOTCFG.rate, free = R.perMinute - this.used() - (priority === 'low' ? R.reserveForCritical : 0);
     if (Clock.now() < this.blockedUntil || units > free) { this.deferred++; return false; }
     for (let i = 0; i < units; i++) this.log.push(Clock.now());
@@ -791,6 +871,10 @@ class Coverage {
 // ---------------------------------------------------------------------
 const TabPFNClient = {
   online: false, backend: 'none', status: 'Checking for the TabPFN server…', url: null,
+  // Where the TabPFN model runs (from /api/health): "local" = open weights on this machine,
+  // "api" = Prior Labs cloud API pinned to TabPFN-3.5. Only the API has a rate limit and token cost.
+  inference: null, model: null, modelShort: null, device: null, ready: false, rateLimited: true, info: null,
+  onChange: null, _poll: null,
   base() {
     if (this.url) return this.url;
     return (typeof location !== 'undefined' && /^https?:$/.test(location.protocol)) ? '' : null;
@@ -799,12 +883,36 @@ const TabPFNClient = {
     const b = this.base();
     if (b === null) { this.status = 'Opened as a file: run "python server.py" and open http://localhost:8000.'; return; }
     try {
-      const j = await (await fetch(b + '/api/health')).json();
-      this.backend = j.backend; this.online = j.backend !== 'none';
-      this.status = j.backend === 'tabpfn' ? 'TabPFN API connected.'
-        : j.backend === 'mock' ? 'Server is in TABPFN_MOCK mode: play mode refuses non-TabPFN outputs.'
-        : (j.tabpfnClientInstalled ? 'TABPFN_TOKEN is empty in .env.' : 'tabpfn-client is not installed on the server.');
+      this.apply(await (await fetch(b + '/api/health')).json());
     } catch (e) { this.online = false; this.status = 'TabPFN server unreachable.'; }
+    if (this.onChange) this.onChange();
+  },
+  apply(j) {
+    this.info = j; this.backend = j.backend; this.online = j.backend !== 'none';
+    this.inference = j.inference || 'api'; this.model = j.model || 'TabPFN-3.5'; this.modelShort = j.modelShort || this.model;
+    this.device = j.device || null; this.ready = j.ready !== false; this.rateLimited = j.rateLimited !== false;
+    this.status = j.status || (j.backend === 'tabpfn' ? 'TabPFN connected.'
+      : j.backend === 'mock' ? 'Server is in TABPFN_MOCK mode: play mode refuses non-TabPFN outputs.'
+      : (j.tabpfnClientInstalled ? 'TABPFN_TOKEN is empty in .env.' : 'tabpfn-client is not installed on the server.'));
+    clearTimeout(this._poll);   // a local model is still loading: check again until it is ready
+    if (this.online && !this.ready) this._poll = setTimeout(() => this.health(), 2000);
+  },
+  /** One line for developer panels: which model answers and where it runs. */
+  describe() {
+    if (!this.model) return '–';
+    if (this.inference === 'local') return `${this.model} · local · ${String(this.device || 'auto').toUpperCase()}${this.ready ? '' : ' (loading…)'}`;
+    if (this.inference === 'api') return `${this.model} · Prior Labs API (pinned v3.5)`;
+    return `${this.model} · ${this.inference}`;
+  },
+  /** DEVELOPER: switch backend ("local" | "api") and/or local model on the server. */
+  async configure(changes) {
+    const r = await fetch(this.base() + '/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(changes) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    this.apply(j);
+    if (this.onChange) this.onChange();
+    return j;
   },
   /** Fire-and-forget: ask the server to fit this table now, so the next predict on it is fast. */
   prefit(X_train, y_train) {
@@ -820,14 +928,15 @@ const TabPFNClient = {
     if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
     return j;
   },
-  async predict(X_train, y_train, X_test) {
+  async predict(X_train, y_train, X_test, priority = 'high') {
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timer = setTimeout(() => ctl && ctl.abort(), BOTCFG.requestTimeoutMs);
     try {
       const r = await fetch(this.base() + '/api/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ X_train, y_train, X_test, stack: BOTCFG.stackTargets }), signal: ctl ? ctl.signal : undefined });
+        body: JSON.stringify({ X_train, y_train, X_test, stack: BOTCFG.stackTargets, priority }), signal: ctl ? ctl.signal : undefined });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+      if (j.inference && this.inference && j.inference !== this.inference) this.health();   // e.g. the server fell back from the API to local
       return j;
     } finally { clearTimeout(timer); }
   },
@@ -854,7 +963,7 @@ class TabPFNRegressorAdapter {
     }
     Guard.counters[this.task] = (Guard.counters[this.task] || 0) + 1;
     try {
-      const res = await this.client.predict(ctx.X, ctx.Y, Xq);
+      const res = await this.client.predict(ctx.X, ctx.Y, Xq, priority);
       const ms = Math.round(Clock.now() - t0), provenance = res.backend === 'tabpfn' ? 'tabpfn' : 'backend:' + res.backend;
       const targets = {};
       for (const k of Object.keys(ctx.Y)) {
@@ -862,8 +971,9 @@ class TabPFNRegressorAdapter {
         targets[k] = r.q50.map((m, i) => ({ mean: m, std: Math.max(1e-3, (r.q90[i] - r.q10[i]) / 2.563), q10: r.q10[i], q50: m, q90: r.q90[i] }));
       }
       if (provenance === 'tabpfn') TabPFNHealth.ok(ms); else TabPFNHealth.fail();
-      CallLog.add({ task: this.task, rows: ctx.X.length, batch: Xq.length, ms, outcome: 'ok', provenance, apiCalls: res.api_calls || units });
-      CallLog.apiCalls += res.api_calls || units;
+      const apiCalls = res.api_calls ?? units;                           // 0 for local inference (no quota)
+      CallLog.add({ task: this.task, rows: ctx.X.length, batch: Xq.length, ms, outcome: 'ok', provenance, apiCalls });
+      CallLog.apiCalls += apiCalls;
       return { targets, provenance, ms };
     } catch (e) {
       if (/Rate limit|HTTP 429/i.test(String(e.message))) RateBudget.rateLimited(String(e.message));
@@ -941,7 +1051,13 @@ class TabularLandingEstimator {
   syncContext(k, items) {
     if (this.fitVersion[k] === this.version) return;
     this.fitVersion[k] = this.version;
-    this.regs[k].fit(items.map(z => z.x), { dx: items.map(z => z.y.dx), dy: items.map(z => z.y.dy), tr: items.map(z => z.y.tr) });
+    this.regs[k].fit(items.map(z => this.withAge(z.x, z.e)), { dx: items.map(z => z.y.dx), dy: items.map(z => z.y.dy), tr: items.map(z => z.y.tr) });
+  }
+  /** Appends "shots ago" (1 = the latest landing; 0 = the shot being predicted) when BOTCFG.landing.ageFeature is on. */
+  withAge(x, e) {
+    if (!this.opts.ageFeature) return x;
+    const i = e ? this.entries.indexOf(e) : -1;
+    return x.concat([i < 0 ? 0 : this.entries.length - i]);
   }
   query(k) {
     const cps = this.opts.checkpoints, cur = this.cur;
@@ -951,7 +1067,7 @@ class TabularLandingEstimator {
     this.syncContext(k, items);
     const q = LandingRows.row(cur, k, cps, this.opts.shotCue);
     this.waiting = true;
-    this.regs[k].predict([q.x]).then(out => {
+    this.regs[k].predict([this.withAge(q.x, null)]).then(out => {
       this.waiting = false;
       if (!Guard.check(out, 'landing')) return;
       const dx = out.targets.dx[0], dy = out.targets.dy[0], tr = out.targets.tr[0];
@@ -974,6 +1090,7 @@ class TabularLandingEstimator {
       const dx = ll.x - last.mean[0], dy = ll.y - last.mean[1];
       this.cov90.add(dx * dx / last.cov[0][0] + dy * dy / last.cov[1][1] <= 4.605);   // chi-square(2) 90 %
       this.err.push(r4(hyp(dx, dy))); if (this.err.length > 30) this.err.shift();
+      if (this.onScore) this.onScore({ shotId: c.shotId, err: r4(hyp(dx, dy)), c: last.c });
     }
     if (!c.byBot) this.entries.push(entry);   // own shots fly at the human's slowed speed: not comparable
     while (this.entries.length > this.opts.window) this.entries.shift();
@@ -1021,8 +1138,8 @@ class TabularDynamicsModel {
     this.reg.fit(this.trans.map(DynRows.row), { dvx: this.trans.map(t => r4(t.dv.x)), dvy: this.trans.map(t => r4(t.dv.y)) });
   }
   /** DynamicsModel.predict(batch of {s, u, up}) -> { meanDelta, std, provenance } */
-  async predict(batch) {
-    const out = await this.reg.predict(batch.map(DynRows.row));
+  async predict(batch, priority = 'high') {
+    const out = await this.reg.predict(batch.map(DynRows.row), priority);
     return { meanDelta: out.targets.dvx.map((a, i) => [a.mean, out.targets.dvy[i].mean]),
              std: out.targets.dvx.map((a, i) => [a.std, out.targets.dvy[i].std]), provenance: out.provenance, ms: out.ms };
   }
@@ -1228,6 +1345,73 @@ class TabularShotModel {
   }
 }
 
+// ---------------------------------------------------------------------
+// Anticipation (opponent habits): where will the opponent hit next? Asked when the bot's own shot comes
+// down and the opponent is about to return it. Row = [where they hit from, bot position, their previous
+// shot, rally shot index] -> landing x, y. DISPLAY ONLY: it never changes the bot's movement or shots.
+// ---------------------------------------------------------------------
+const AnticipationRows = {
+  names: ['hitFromX', 'hitFromY', 'botX', 'botY', 'prevX', 'prevY', 'prevNone', 'prevClear', 'prevDrop', 'prevSmash', 'rallyShot'],
+  row(c) {
+    const p = c.prev, t = p ? p.type : 'none';
+    return [r4(c.from.x), r4(c.from.y), r4(c.bot.x), r4(c.bot.y), p ? r4(p.x) : 0, p ? r4(p.y) : 0,
+            +(t === 'none'), +(t === 'clear'), +(t === 'drop'), +(t === 'smash'), c.k];
+  },
+};
+
+class TabularAnticipationModel {
+  constructor(makeReg, opts = BOTCFG.anticipation) {
+    this.opts = opts; this.reg = makeReg('anticipation'); this.data = []; this.version = 0; this.fitVersion = -1;
+    this.pending = null; this.waiting = false; this.prev = null; this.k = 0; this.history = [];
+    this.onScore = null; this.onOutput = null; this.onFail = null;
+  }
+  rows() { return this.data.length; }
+  /** Current prediction to draw (null until TabPFN has answered for the shot about to be played). */
+  get pred() { return this.pending && this.pending.pred; }
+  onRallyStart() { this.prev = null; this.k = 0; this.pending = null; }
+  sync() {
+    if (this.fitVersion === this.version || this.data.length < this.opts.minRows) return;
+    this.fitVersion = this.version;
+    this.reg.fit(this.data.map(d => d.x), { x: this.data.map(d => d.y.x), y: this.data.map(d => d.y.y) });
+  }
+  /** The bot's shot came down in play: the opponent will hit from there. Ask TabPFN where to. */
+  ask(from, bot) {
+    const p = { x: AnticipationRows.row({ from, bot, prev: this.prev, k: this.k }), pred: null };
+    this.pending = p;
+    if (this.data.length < this.opts.minRows) return;
+    this.sync();
+    this.waiting = true;
+    this.reg.predict([p.x], 'low').then(out => {
+      this.waiting = false;
+      if (!Guard.check(out, 'anticipation') || this.pending !== p) return;
+      const tx = out.targets.x[0], ty = out.targets.y[0];
+      p.pred = { mean: [r4(tx.mean), r4(ty.mean)], sd: [tx.std, ty.std], provenance: out.provenance };
+      if (this.onOutput) this.onOutput('anticipation', p.pred);
+    }, err => { this.waiting = false; if (!err.deferred && this.onFail) this.onFail(err); });
+  }
+  /** The opponent's rally shot landed: it labels the pending row and scores the prediction. */
+  label(ll) {
+    const p = this.pending;
+    this.pending = null; this.prev = { x: ll.x, y: ll.y, type: ll.shotType }; this.k++;
+    if (!p) return;
+    this.data.push({ x: p.x, y: { x: r4(ll.x), y: r4(ll.y) } });
+    while (this.data.length > this.opts.window) this.data.shift();
+    this.version++;
+    if (p.pred) {
+      const err = r4(hyp(ll.x - p.pred.mean[0], ll.y - p.pred.mean[1]));
+      this.history.push(err); if (this.history.length > 200) this.history.shift();
+      if (this.onScore) this.onScore({ err });
+    }
+  }
+  /** Median error and share within `within` m over the last n scored predictions. */
+  accuracy(n = 20) {
+    const h = this.history.slice(-n);
+    if (!h.length) return null;
+    const s = h.slice().sort((a, b) => a - b);
+    return { median: s[Math.floor(s.length / 2)], within: h.filter(e => e <= this.opts.within).length / h.length, n: h.length };
+  }
+}
+
 /** Warm-up exploration controller: random piecewise-constant commands (not a predictor). */
 class Explorer {
   constructor(seed) { this.rng = { s: seed >>> 0 }; this.u = [0, 0]; this.until = -1; }
@@ -1263,6 +1447,7 @@ class BotController {
     this.landing = opts.landing || new TabularLandingEstimator(mk);
     this.dynamics = opts.dynamics || new TabularDynamicsModel(mk);
     this.shots = opts.shots || new TabularShotModel(mk);
+    this.anticip = opts.anticip || new TabularAnticipationModel(mk);
     this.planner = opts.planner || new CEMPlanner(BOTCFG.mpc, { s: 0x2545f491 });
     this.explorer = new Explorer(0x1234567);
     this.storageKey = opts.storageKey === undefined ? BOTCFG.storageKey : opts.storageKey;
@@ -1270,8 +1455,8 @@ class BotController {
     this.stats = { late: 0, failed: 0, refused: 0 };
     this.providerLog = [];                       // every provider output used, for the replay log / export
     const fail = () => { this.stats.failed++; };
-    this.landing.onFail = this.dynamics.onFail = this.shots.onFail = fail;
-    this.landing.onOutput = this.shots.onOutput = (task, out) => this.logOutput(task, out);
+    this.landing.onFail = this.dynamics.onFail = this.shots.onFail = this.anticip.onFail = fail;
+    this.landing.onOutput = this.shots.onOutput = this.anticip.onOutput = (task, out) => this.logOutput(task, out);
     this.rng = { s: 0x9e3779b9 };
     this.load();
     this.reset();
@@ -1279,7 +1464,8 @@ class BotController {
   reset() {
     this.obs = null; this.cmd = { x: 0, y: 0 }; this.lastU = [0, 0]; this.plan = null; this.prevCtrl = null;
     this.wasMustHit = false; this.lastLandingId = null; this.status = 'idle'; this.lateFlag = false;
-    this.latSim = 0; this.warmHit = null; this.strictPending = false;
+    this.latSim = 0; this.warmHit = null; this.strictPending = false; this.lastPhase = null;
+    if (this.anticip) this.anticip.onRallyStart();
   }
   setMode(m) { this.mode = m; this.landing.enabled = m === 'play'; }
   logOutput(task, out) {
@@ -1292,7 +1478,7 @@ class BotController {
     const o = this.obs;
     return !!o && this.mode === 'play' && this.isBusy() && ((o.incoming && o.incoming.hitter !== o.me) || o.mustHit);
   }
-  contextSizes() { return { landing: this.landing.rows(), dynamics: this.dynamics.rows(), shot: this.shots.rows() }; }
+  contextSizes() { return { landing: this.landing.rows(), dynamics: this.dynamics.rows(), shot: this.shots.rows(), anticipation: this.anticip.rows() }; }
   lowContext() {
     const c = this.contextSizes(), L = BOTCFG.lowContext;
     return c.landing < L.landing || c.dynamics < L.dynamics || c.shot < L.shot;
@@ -1301,6 +1487,8 @@ class BotController {
 
   observe(o) {
     this.obs = o;
+    if (o.phase === 'serve' && this.lastPhase !== 'serve') this.anticip.onRallyStart();
+    this.lastPhase = o.phase;
     const ll = o.lastLanding;
     if (ll && ll.shotId !== this.lastLandingId) { this.lastLandingId = ll.shotId; this.onLanding(ll); }
     this.landing.update(o);
@@ -1314,6 +1502,10 @@ class BotController {
     const o = this.obs;
     const oppNext = this.mode === 'play' && (ll.hitter === o.me ? ll.outcome !== 'winner' : ll.outcome === 'winner');
     const entry = this.landing.onLanding(ll, oppNext);
+    if (this.mode === 'play') {                    // anticipation of the opponent's next shot (display only)
+      if (ll.hitter !== o.me && !ll.isServe) this.anticip.label(ll);
+      else if (ll.hitter === o.me && ll.outcome === 'returned') this.anticip.ask({ x: ll.x, y: ll.y }, { x: o.self.x, y: o.self.y });
+    }
     if (entry && ll.hitter === o.me && ll.target) {
       this.shots.scoreCommitted(ll);
       this.shots.add({ shotId: ll.shotId, type: ll.shotType, p0: entry.p0, target: ll.target, landing: { x: ll.x, y: ll.y }, t: entry.t });
@@ -1478,7 +1670,8 @@ class BotController {
   save() {
     if (!this.storageKey) return;
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify({ v: 1, landing: this.landing.entries, dynamics: this.dynamics.trans, shot: this.shots.own }));
+      localStorage.setItem(this.storageKey, JSON.stringify({ v: 1, landing: this.landing.entries, dynamics: this.dynamics.trans, shot: this.shots.own,
+                                                             anticipation: this.anticip.data }));
     } catch (e) { /* storage unavailable */ }
   }
   load() {
@@ -1489,17 +1682,19 @@ class BotController {
       this.landing.entries = j.landing || []; this.landing.version++;
       this.dynamics.trans = j.dynamics || []; this.dynamics.newSinceFit = this.dynamics.trans.length;
       this.shots.own = j.shot || []; this.shots.version++;
+      this.anticip.data = j.anticipation || []; this.anticip.version++;
     } catch (e) { /* storage unavailable */ }
   }
   clearMemory() {
     this.landing.entries = []; this.landing.version++; this.dynamics.trans = []; this.dynamics.sur = null; this.shots.own = []; this.shots.version++;
+    this.anticip.data = []; this.anticip.version++; this.anticip.history = [];
     try { localStorage.removeItem(this.storageKey); } catch (e) { /* ignore */ }
   }
   /** Fit all contexts now (after warm-up / a stored context), so the first rally does not wait. */
   prefitAll() {
     this.dynamics.maybeRefit(true);
     this.dynamics.sur = null;
-    this.shots.sync();
+    this.shots.sync(); this.anticip.sync();
     BOTCFG.landing.checkpoints.forEach((_, k) => {
       const items = LandingRows.table(this.landing.entries, k, BOTCFG.landing.checkpoints, BOTCFG.landing.shotCue);
       if (items.length >= BOTCFG.landing.minRows) this.landing.syncContext(k, items);
@@ -1682,7 +1877,8 @@ const Sim = {
   launch(S, hitter, type, target, logger, isServe) {
     const p = S.players[hitter], rc = S.players[1 - hitter], cfg = S.cfg;
     const plan = Physics.plan({ from: { x: p.x, y: p.y }, target, type, t0: S.tick * DT }, S.wind, cfg, S.rng.shot);
-    const timeScale = cfg.slowShotsTo === 1 - hitter && cfg.botShotSlowdown > 1 ? cfg.botShotSlowdown : 1;
+    const slow = cfg.slowShotsFactor || cfg.botShotSlowdown;      // watch mode sets its own practice pace
+    const timeScale = cfg.slowShotsTo === 1 - hitter && slow > 1 ? slow : 1;
     if (timeScale !== 1) { plan.T *= timeScale; plan.timeScale = timeScale; }   // give the human time to react
     const shotId = ++S.shotSeq;
     const rec = {
@@ -1888,12 +2084,12 @@ class Renderer {
     const tNow = S.tick * DT;
     if (ui.debug) {
       for (let gx = -3; gx <= 3.01; gx += 1.5) for (let gy = -6; gy <= 6.01; gy += 1.5) {
-        const w = Wind.at(S.wind, cfg.windStrength, gx, gy, tNow);
+        const w = Wind.at(S.wind, Worlds.windStrength(cfg), gx, gy, tNow, Worlds.gust(cfg));
         const k = 0.35;
         this.line(gx, gy, gx + w.x * k, gy + w.y * k, col.wind, 2);
         this.circle(gx + w.x * k, gy + w.y * k, 0.05, col.wind, null);
       }
-      const w0 = Wind.at(S.wind, cfg.windStrength, 0, 0, tNow);
+      const w0 = Wind.at(S.wind, Worlds.windStrength(cfg), 0, 0, tNow, Worlds.gust(cfg));
       this.text(`true wind @ net centre: ${hyp(w0.x, w0.y).toFixed(2)} m/s`, 12, this.h - 18, col.wind, 14, 'left');
     }
 
@@ -1953,6 +2149,14 @@ class Renderer {
         this.circle(est.mean[0], est.mean[1], cfg.reach, null, this.alpha(bc, 0.85), 1.5, [2, 4]);
         this.text(ui.debug ? `TabPFN 90% (t+${est.c}s)` : `${OPPONENT_NAME} expects it here`, this.X(est.mean[0]), this.Y(est.mean[1]) - ry - 10, bc, 13);
       }
+      const ap = bot.anticip && bot.anticip.pred;       // where TabPFN-3.5 expects the opponent's next shot
+      if (ap && S.phase !== 'dead' && S.phase !== 'over' && !(S.phase === 'flight' && sh && sh.hitter !== bi)) {
+        const rx = Math.max(4, 1.645 * ap.sd[0] * this.sc), ry = Math.max(4, 1.645 * ap.sd[1] * this.sc);
+        c.setLineDash([2, 4]); c.strokeStyle = this.alpha(bc, 0.9); c.lineWidth = 1.5; c.fillStyle = this.alpha(bc, 0.06); c.beginPath();
+        c.ellipse(this.X(ap.mean[0]), this.Y(ap.mean[1]), rx, ry, 0, 0, Math.PI * 2); c.fill(); c.stroke(); c.setLineDash([]);
+        this.cross(ap.mean[0], ap.mean[1], 0.12, this.alpha(bc, 0.9), 2);
+        this.text(`${OPPONENT_NAME} expects ${ui.watch ? "the robot's" : 'your'} next shot here`, this.X(ap.mean[0]), this.Y(ap.mean[1]) + ry + 12, bc, 12, 'center', 500);
+      }
       const poly = (pts, w, a) => {
         if (!pts || pts.length < 2) return;
         c.strokeStyle = this.alpha(bc, a); c.lineWidth = w; c.beginPath();
@@ -2011,6 +2215,187 @@ class ScriptController {
       }
     } else this.wait = 0;
     return out;
+  }
+}
+
+// Watch mode's sparring robot (P1). It is a practice partner, not a competitor: it sees where the shuttle
+// will land, and it picks shots by STYLE so TabPFN-3.5 has habits to learn. Shown as a robot in the UI.
+// Styles are the same as the opponent personalities in experiments/gen_adapt.js.
+const SPARRING_STYLES = { crosscourt: 'Cross-court', dropper: 'Drop artist', smasher: 'Smasher', away: 'Plays away',
+                          pattern: 'Fixed pattern', random: 'Random (nothing to learn)' };
+/** Intended shot in the hitter's frame (hitter on the y > 0 side; h = hitter, b = opponent, k = rally shot). */
+function sparringIntent(style, st, u) {
+  const W = COURT.singlesHalfW, sgn = v => (v >= 0 ? 1 : -1), deep = () => -(4.8 + 1.6 * u()), front = () => -(0.5 + 1.5 * u());
+  switch (style) {
+    case 'crosscourt': return { type: u() < 0.8 ? 'clear' : 'smash', x: -sgn(st.hx + (u() - 0.5) * 0.3) * (1.2 + 1.2 * u()), y: deep() };
+    case 'dropper': return u() < 0.65 ? { type: 'drop', x: -sgn(st.bx) * (1.0 + 1.4 * u()), y: front() } : { type: 'clear', x: (u() - 0.5) * 2, y: deep() };
+    case 'smasher': return st.hy < 3.0 ? { type: 'smash', x: st.bx + (u() - 0.5) * 1.2, y: -(2.5 + 2.5 * u()) } : { type: 'clear', x: (u() - 0.5) * 4, y: deep() };
+    case 'away': return st.by > -3.5 ? { type: 'clear', x: -sgn(st.bx) * 2.2, y: deep() } : { type: 'drop', x: -sgn(st.bx) * 2.0, y: front() };
+    case 'pattern': return [{ type: 'clear', x: -2, y: -6 }, { type: 'drop', x: 2, y: -1.2 }, { type: 'clear', x: 2, y: -6 }, { type: 'drop', x: -2, y: -1.2 }][st.k % 4];
+    default: { const type = RALLY_SHOTS[Math.floor(u() * 3)]; return { type, x: (u() - 0.5) * 2 * W, y: type === 'drop' ? front() : -(0.5 + 5.9 * u()) }; }
+  }
+}
+class SparringController {
+  constructor(style, getState, seed = 0x5eed) { this.style = style; this.getState = getState; this.rng = { s: seed >>> 0 }; this.o = null; this.wait = 0; this.k = 0; }
+  observe(o) { this.o = o; if (o.phase === 'serve') this.k = 0; }
+  act() {
+    const o = this.o, S = this.getState(), u = () => RNG.next(this.rng);
+    let tx = 0, ty = o.side * 3.5;
+    const inc = o.incoming;
+    if (inc && inc.hitter !== o.me && S && S.shot && S.shot.id === inc.shotId) {
+      if (this.missFor !== inc.shotId) {            // now and then it misjudges, so rallies end
+        this.missFor = inc.shotId; this.miss = u() < 0.12 ? { x: (u() - 0.5) * 5, y: (u() - 0.5) * 5 } : null;
+      }
+      const L = S.shot.plan.landing; tx = L.x + (this.miss ? this.miss.x : 0); ty = L.y + (this.miss ? this.miss.y : 0);
+    }
+    const out = { move: { x: clamp((tx - o.self.x) * 2.5, -1, 1), y: clamp((ty - o.self.y) * 2.5, -1, 1) } };
+    if (o.mustHit) { if (++this.wait > 40) { this.wait = 0; out.hit = this.shot(o, u); } } else this.wait = 0;
+    return out;
+  }
+  shot(o, u) {
+    if (o.phase === 'serve') { const z = o.validZones.serve; return { shotType: 'serve', target: { x: z.x0 + (z.x1 - z.x0) * u(), y: z.y0 + (z.y1 - z.y0) * u() } }; }
+    const s = o.side, it = sparringIntent(this.style, { hx: o.self.x * s, hy: o.self.y * s, bx: o.opponent.x * s, by: o.opponent.y * s, k: this.k++ }, u);
+    const tgt = { x: (it.x + RNG.gauss(this.rng) * 0.25) * s, y: (it.y + RNG.gauss(this.rng) * 0.25) * s };
+    return { shotType: it.type, target: Rules.clampTo(tgt, o.validZones[it.type]) };
+  }
+}
+
+/** "TabPFN-3.5 is learning": per-shot landing error and next-shot-guess error, with world-switch markers. */
+const LearningChart = {
+  pts: [], marks: [], n: 0, dirty: true,
+  reset() { this.pts = []; this.marks = []; this.n = 0; this.dirty = true; },
+  add(kind, err) {
+    if (Recorder.rec) Recorder.event({ k: 'chart', v: [kind, err] });
+    if (kind === 'landing') this.n++;
+    this.pts.push({ n: kind === 'landing' ? this.n : this.n + 0.5, err, kind });
+    if (this.pts.length > 600) this.pts.shift();
+    this.dirty = true;
+  },
+  mark(label) { if (Recorder.rec) Recorder.event({ k: 'mark', v: label }); this.marks.push({ n: this.n + 0.5, label }); if (this.marks.length > 50) this.marks.shift(); this.dirty = true; },
+  median(a) { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; },
+  statsText(anticip) {
+    const land = this.pts.filter(p => p.kind === 'landing').map(p => p.err);
+    if (!land.length) return 'Waiting for the first predictions…';
+    const m = v => v.toFixed(2) + ' m';
+    let t = `Landing: median error of the last 10 shots ${m(this.median(land.slice(-10)))}`;
+    const lastMark = this.marks.length ? this.marks[this.marks.length - 1] : null;
+    if (lastMark) { const since = this.pts.filter(p => p.kind === 'landing' && p.n > lastMark.n).map(p => p.err);
+                    if (since.length >= 3) t += ` · first 3 after the switch ${m(this.median(since.slice(0, 3)))}`; }
+    const a = anticip && anticip.accuracy();
+    t += a ? ` · Next shot: median error ${m(a.median)}, ${Math.round(a.within * 100)}% within ${anticip.opts.within} m (last ${a.n})`
+           : ' · Next-shot guesses start after a few of your shots.';
+    return t;
+  },
+  draw(canvas, col) {
+    const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+    const n1 = Math.max(60, this.n + 1), n0 = n1 - 60, pts = this.pts.filter(p => p.n > n0);
+    const errs = pts.map(p => p.err).sort((a, b) => a - b);
+    const ymax = Math.max(1.5, Math.ceil(2 * (errs[Math.floor(errs.length * 0.95)] || 0)) / 2);
+    const L = 30, R = 6, T = 14, B = 16, X = n => L + (n - n0) / (n1 - n0) * (w - L - R), Y = e => T + (1 - Math.min(e, ymax) / ymax) * (h - T - B);
+    c.font = '11px system-ui, sans-serif'; c.fillStyle = col.text; c.strokeStyle = col.lineFaint || '#888'; c.lineWidth = 1;
+    for (const v of [0, ymax / 2, ymax]) { c.globalAlpha = 0.35; c.beginPath(); c.moveTo(L, Y(v)); c.lineTo(w - R, Y(v)); c.stroke(); c.globalAlpha = 0.8;
+                                           c.textAlign = 'right'; c.textBaseline = 'middle'; c.fillText(v.toFixed(1), L - 4, Y(v)); }
+    c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('m', 2, T - 3); c.textAlign = 'right'; c.fillText('shots →', w - R, h - 3); c.globalAlpha = 1;
+    const lineEnd = [-1e9, -1e9];                              // labels go on one of two lines, or are skipped if both are taken
+    for (const mk of this.marks.filter(m => m.n > n0)) {
+      c.setLineDash([4, 3]); c.strokeStyle = col.text; c.globalAlpha = 0.5; c.beginPath(); c.moveTo(X(mk.n), T); c.lineTo(X(mk.n), h - B); c.stroke();
+      c.setLineDash([]); c.globalAlpha = 0.85; c.fillStyle = col.text; c.textAlign = 'left';
+      const x = X(mk.n) + 3, wd = c.measureText(mk.label).width, row = x > lineEnd[0] + 4 ? 0 : x > lineEnd[1] + 4 ? 1 : -1;
+      if (row >= 0 && x + wd <= w) { c.fillText(mk.label, x, row ? T + 10 : T - 2); lineEnd[row] = x + wd; }
+      c.globalAlpha = 1;
+    }
+    const land = pts.filter(p => p.kind === 'landing');
+    c.fillStyle = col.p[1];
+    for (const p of land) { c.beginPath(); c.arc(X(p.n), Y(p.err), 2.6, 0, 2 * Math.PI); c.fill(); }
+    if (land.length > 1) {
+      c.strokeStyle = col.p[1]; c.lineWidth = 2; c.beginPath();
+      land.forEach((p, i) => { const win = land.slice(Math.max(0, i - 7), i + 1), m = win.reduce((s, q) => s + q.err, 0) / win.length;
+                               i ? c.lineTo(X(p.n), Y(m)) : c.moveTo(X(p.n), Y(m)); });
+      c.stroke();
+    }
+    c.strokeStyle = col.text; c.globalAlpha = 0.6; c.lineWidth = 1.5;
+    for (const p of pts.filter(q => q.kind === 'antic')) { c.beginPath(); c.arc(X(p.n), Y(p.err), 3.2, 0, 2 * Math.PI); c.stroke(); }
+    c.globalAlpha = 1;
+    this.dirty = false;
+  },
+};
+
+// =====================================================================
+// RECORDED DEMO: record a live session, then replay it with no server and no TabPFN calls.
+// The simulator is deterministic, so a recording only needs the starting snapshot, every player's
+// actions (stored when they change), world / court changes and new-match snapshots, plus what the bot
+// showed on screen: its TabPFN landing estimate, next-shot guess, confidence, status, calibration and
+// the learning chart. Every prediction shown in a replay was made by TabPFN-3.5 live during recording.
+// =====================================================================
+const Recorder = {
+  rec: null,
+  start(app) {
+    this.app = app;
+    this.rec = { v: 1, created: new Date().toISOString(), model: TabPFNClient.describe(), names: app.names.slice(),
+                 style: app.sparring.style, snapshot: Sim.snapshot(app.S),
+                 chart: JSON.parse(JSON.stringify({ pts: LearningChart.pts, marks: LearningChart.marks, n: LearningChart.n })),
+                 ticks: 0, acts: [], env: [], events: [] };
+    this.last = { acts: ['', ''], ov: {} };
+    this.sample();
+  },
+  event(e) { if (this.rec) this.rec.events.push({ t: this.rec.ticks, ...e }); },
+  /** Called by App.tick after every live tick with the actions both players took. */
+  tickDone(acts, env) {
+    const R = this.rec;
+    if (env) R.env.push([R.ticks, env]);
+    for (const i of [0, 1]) {
+      const j = JSON.stringify(acts[i] || null);
+      if (j !== this.last.acts[i]) { R.acts.push([R.ticks, i, acts[i] || null]); this.last.acts[i] = j; }
+    }
+    R.ticks++;
+    this.sample();
+  },
+  /** What the bot shows on screen, stored only when it changes. */
+  sample() {
+    const app = this.app, b = app.bot, r = v => (v == null ? null : Math.round(v * 1000) / 1000);
+    const e = b.landing.est, a = b.anticip.pred;
+    const ov = {
+      est: e ? { shotId: e.shotId, mean: e.mean, cov: e.cov, c: e.c } : null,
+      ap: a ? { mean: a.mean, sd: a.sd } : null,
+      ph: b.plan && b.plan.pHit != null ? r(b.plan.pHit) : null,
+      st: b.mode === 'warmup' ? 'warmup' : b.status, th: !!app.thinking,
+      cv: [r(b.landing.cov90.rate), r(b.dynamics.cov90.rate)],
+      ac: b.anticip.accuracy(),
+    };
+    for (const k of Object.keys(ov)) {
+      const j = JSON.stringify(ov[k]);
+      if (j !== this.last.ov[k]) { this.last.ov[k] = j; this.rec.events.push({ t: this.rec.ticks, k, v: ov[k] }); }
+    }
+  },
+  stop() { const r = this.rec; this.rec = null; return r; },
+};
+
+/** Stands in for the BotController during a replay: plays the recorded actions and shows the recorded
+ *  TabPFN outputs, so the renderer and the panels work unchanged. It makes no predictions itself. */
+class RecordedBot {
+  constructor() {
+    this.landing = { est: null, cov90: { rate: null } }; this.dynamics = { cov90: { rate: null }, retryAt: 0 };
+    this.anticip = { pred: null, acc: null, opts: BOTCFG.anticipation, accuracy() { return this.acc; } };
+    this.plan = null; this.shots = { decision: null }; this.mode = 'play'; this.status = 'ok'; this.thinking = false;
+    this.providerLog = []; this.stats = { late: 0, failed: 0 }; this.replanMs = null; this.cur = null;
+  }
+  observe() {}
+  act() { return this.cur || { move: { x: 0, y: 0 } }; }
+  isCritical() { return false; }
+  contextSizes() { return { landing: '–', dynamics: '–', shot: '–', anticipation: '–' }; }
+  lowContext() { return false; }
+  reset() {}
+  apply(k, v) {
+    if (k === 'est') this.landing.est = v;
+    else if (k === 'ap') this.anticip.pred = v;
+    else if (k === 'ph') this.plan = v == null ? null : { pHit: v };
+    else if (k === 'st') { this.mode = v === 'warmup' ? 'warmup' : 'play'; this.status = v; }
+    else if (k === 'th') this.thinking = v;
+    else if (k === 'cv') { this.landing.cov90.rate = v[0]; this.dynamics.cov90.rate = v[1]; }
+    else if (k === 'ac') this.anticip.acc = v;
   }
 }
 
@@ -2161,6 +2546,16 @@ const SelfTest = {
     const refused = ['knn', 'oracle', 'linear-extrapolation', 'physics-fit', 'ekf', 'backend:mock', undefined].every(pv => !Guard.check({ provenance: pv }, 'test'));
     check('play-mode guard refuses every non-TabPFN provenance', refused && Guard.rejected - rej0 === 7);
     check('play-mode guard accepts tabpfn and tabpfn-linearized', Guard.check({ provenance: 'tabpfn' }, 'test') && Guard.check({ provenance: 'tabpfn-linearized' }, 'test'));
+    {
+      // Local inference (open TabPFN-3.5 weights on this machine) is still TabPFN: no rate budget, no token cost.
+      const saved = { ...TabPFNClient }, savedLog = RateBudget.log.slice();
+      TabPFNClient.apply({ backend: 'tabpfn', inference: 'local', model: 'TabPFN-3.5', modelShort: 'TabPFN-3.5', device: 'mps', ready: true, rateLimited: false });
+      const local = TabPFNClient.online && !TabPFNClient.rateLimited && RateBudget.take(1000, 'low') && RateBudget.log.length === savedLog.length;
+      TabPFNClient.apply({ backend: 'tabpfn', inference: 'api', model: 'TabPFN-3.5', ready: true, rateLimited: true });
+      const api = TabPFNClient.rateLimited && !RateBudget.take(1000, 'low') && /Prior Labs API/.test(TabPFNClient.describe());
+      Object.assign(TabPFNClient, saved); RateBudget.log = savedLog; RateBudget.deferred--;
+      check('local TabPFN inference skips the API rate budget; API mode keeps it and says TabPFN-3.5', local && api);
+    }
 
     const tm = Observation.build(S, 0).params.shotTiming;
     const ent = { type: 'clear', p0: { x: 0, y: 4 }, botAt: [{ x: 0, y: -3 }, { x: 0.2, y: -3.2 }, { x: 0.5, y: -3.5 }],
@@ -2205,8 +2600,103 @@ const SelfTest = {
     const blob = [OL.toCSV(), OL.toJSON(), JSON.stringify(CallLog.entries), JSON.stringify(offBot.providerLog),
                   JSON.stringify({ landing: offBot.landing.entries, dynamics: offBot.dynamics.trans })].join('\n');
     check('exports contain no token or token-like secrets', !/TABPFN_TOKEN|eyJ[A-Za-z0-9_-]{12,}|[A-Za-z0-9_-]{40,}/.test(blob));
+
+    // Landing "shots ago" feature: context rows count back from the latest landing (1), the query is 0
+    const cap = { fitX: null, qX: null };
+    const capReg = { ctx: null, pendingCtx: null, fit(X) { cap.fitX = X; this.ctx = { X }; return Promise.resolve(); },
+                     predict(Xq) { cap.qX = Xq; return new Promise(() => {}); } };
+    const ageEst = new TabularLandingEstimator(() => capReg);
+    ageEst.entries = Array.from({ length: 12 }, (_, i) => ({ ...ent, shotId: i, landing: { x: 0, y: -5 }, tArrival: 1.5 })); ageEst.version++;
+    ageEst.cur = { ...ent, shotId: 99, byBot: false, asked: -1, estimates: [] };
+    ageEst.query(0);
+    const nm = LandingRows.names(0, BOTCFG.landing.checkpoints, true).length;
+    check('landing context rows carry "shots ago" (12 ... 1) and the query row 0',
+      cap.fitX && cap.fitX.length === 12 && cap.fitX.every(r => r.length === nm + 1) && cap.fitX[0][nm] === 12 && cap.fitX[11][nm] === 1 &&
+      cap.qX && cap.qX[0][nm] === 0);
+
+    // --- Shuttle worlds, anticipation, sparring robot ------------------------------------------------
+    const wn = Worlds.apply(DEFAULT_CONFIG, 'normal'), WP = Wind.makeParams(7);
+    check('shuttle world "normal" leaves the shot physics and the wind unchanged',
+      JSON.stringify(wn.shots) === JSON.stringify(DEFAULT_CONFIG.shots) && Worlds.windStrength(wn) === DEFAULT_CONFIG.windStrength &&
+      JSON.stringify(Wind.at(WP, 1, 1, 2, 3)) === JSON.stringify(Wind.at(WP, 1, 1, 2, 3, Worlds.gust(wn))));
+    const planIn = w => Physics.plan({ from: { x: 0, y: 4 }, target: { x: 1, y: -4 }, type: 'clear', t0: 1 }, WP, Worlds.apply(DEFAULT_CONFIG, w), { s: 3 });
+    const Sm = Sim.create('world', 1, Worlds.apply(DEFAULT_CONFIG, 'moon'), 1);
+    check('worlds change the flight (low gravity is slower) but the bot is still told only the default timing law',
+      planIn('moon').T > 1.4 * planIn('normal').T && planIn('heavy').T < planIn('normal').T &&
+      Observation.build(Sm, 1).params.shotTiming.clear.baseTime === DEFAULT_CONFIG.shots.clear.baseTime);
+    check('a world change takes effect at the next rally start and the rally replays identically', SelfTest.replayWorld());
+    const fakeReg = prov => ({ ctx: null, fit() { this.ctx = 1; return Promise.resolve(); },
+      predict: Xq => Promise.resolve({ provenance: prov, targets: { x: Xq.map(() => ({ mean: 1, std: 0.5 })), y: Xq.map(() => ({ mean: -3, std: 0.5 })) } }) });
+    const antOk = new TabularAnticipationModel(() => fakeReg('tabpfn')), antBad = new TabularAnticipationModel(() => fakeReg('knn'));
+    for (const A of [antOk, antBad]) {
+      for (let i = 0; i < 8; i++) { A.pending = { x: AnticipationRows.row({ from: { x: 0, y: 3 }, bot: { x: 0, y: -3 }, prev: null, k: i }), pred: null };
+                                    A.label({ x: i * 0.1, y: -3, shotType: 'clear' }); }
+    }
+    antOk.ask({ x: 0, y: 3 }, { x: 0, y: -3 });
+    // the refused call runs after the other guard checks have counted their own rejections
+    this.asyncChecks.push(new Promise(r => setTimeout(r, 5)).then(() => {
+      const vb = Guard.rejected; antBad.ask({ x: 0, y: 3 }, { x: 0, y: -3 });
+      return new Promise(r => setTimeout(r, 0)).then(() =>
+        ['anticipation: TabPFN outputs are shown, any other provenance is refused', antOk.pred && antOk.pred.mean[0] === 1 && !antBad.pred && Guard.rejected === vb + 1]);
+    }));
+    check('anticipation rows: one value per column, labelled by the next landing', antOk.data.length === 8 &&
+      antOk.data.every(d => d.x.length === AnticipationRows.names.length && d.x.every(Number.isFinite)));
+    const So = Sim.create('spar', 1, DEFAULT_CONFIG, 1);
+    let legal = true;
+    for (const style of Object.keys(SPARRING_STYLES)) {
+      const sp = new SparringController(style, () => So);
+      for (let i = 0; i < 40; i++) {
+        const o = { side: i % 2 ? 1 : -1, self: { x: (i % 5) - 2, y: (i % 2 ? 1 : -1) * (1 + (i % 6)) }, opponent: { x: 2 - (i % 4), y: (i % 2 ? -1 : 1) * 3 }, phase: 'aim' };
+        o.validZones = {}; for (const k of RALLY_SHOTS) o.validZones[k] = Rules.zoneFor(So.rules, o.side, k, DEFAULT_CONFIG);
+        const h = sp.shot(o, () => RNG.next(sp.rng));
+        legal = legal && RALLY_SHOTS.includes(h.shotType) && Rules.inRect(h.target, o.validZones[h.shotType]);
+      }
+    }
+    check('sparring robot: every style plays legal rally shots from both ends', legal);
+
+    // Recorded demo: a recording (actions when they change + world events) replays to the identical game
+    {
+      const S0 = Sim.create('rec', 1, DEFAULT_CONFIG, 1), Lr = new ShotLogger(), sc = [new ScriptController(), new ScriptController()];
+      const fake = { S: S0, bot: new RecordedBot(), names: ['A', 'B'], sparring: { style: 'pattern' }, thinking: false };
+      Recorder.start(fake);
+      for (let k = 0; k < 4000; k++) {
+        if (k === 1500) { S0.pendingCfg = Worlds.apply(S0.pendingCfg, 'moon'); Recorder.event({ k: 'world', v: 'moon' }); }
+        Recorder.tickDone(Sim.step(S0, sc, Lr), null);
+      }
+      const rec = JSON.parse(JSON.stringify(Recorder.stop()));            // through JSON, like the demo file
+      const R = Sim.restore(rec.snapshot), cur = [null, null], L2 = new ShotLogger();
+      const rc = [0, 1].map(i => ({ observe() {}, act: () => cur[i] || { move: { x: 0, y: 0 } } }));
+      let ai = 0, ei = 0;
+      for (let k = 0; k < rec.ticks; k++) {
+        while (ai < rec.acts.length && rec.acts[ai][0] === k) { const a = rec.acts[ai++]; cur[a[1]] = a[2]; }
+        Sim.step(R, rc, L2);
+        while (ei < rec.events.length && rec.events[ei].t <= k + 1) { const e = rec.events[ei++]; if (e.k === 'world') R.pendingCfg = Worlds.apply(R.pendingCfg, e.v); }
+      }
+      const strip = x => JSON.stringify({ ...x, events: [] });
+      check('a recording replays to the identical game (actions stored only when they change, world switch included)',
+        Lr.records.length > 5 && strip(R) === strip(S0) && JSON.stringify(L2.records) === JSON.stringify(Lr.records) && rec.acts.length < rec.ticks);
+    }
+
     Guard.mode = savedMode; Guard.strictThrow = savedThrow;
     return res;
+  },
+  /** Rally 2 starts in a new world (set between rallies through pendingCfg) and replays identically. */
+  replayWorld() {
+    const S = Sim.create('world-replay', 1, DEFAULT_CONFIG, 1), L = new ShotLogger(), c = [new ScriptController(), new ScriptController()];
+    let snap = null, acts = [], done = null;
+    const handle = s => { for (const e of s.events.splice(0)) {
+      if (e.type === 'point' && e.rallyId === 1) s.pendingCfg = Worlds.apply(s.pendingCfg, 'feather');
+      if (e.type === 'rallyStart') { snap = Sim.snapshot(s); acts = []; }
+      if (e.type === 'point' && e.rallyId === 2) done = { snap, acts };
+    } };
+    handle(S);
+    for (let k = 0; k < 200000 && !done; k++) { acts.push(Sim.step(S, c, L)); handle(S); }
+    if (!done || done.snap.cfg.world !== 'feather') return false;
+    const R = Sim.restore(done.snap), L2 = new ShotLogger(), rc = [new ReplayController(done.acts, 0), new ReplayController(done.acts, 1)];
+    let fin = false;
+    for (let k = 0; k < done.acts.length && !fin; k++) { Sim.step(R, rc, L2); fin = R.events.some(e => e.type === 'point'); }
+    const orig = L.records.filter(r => r.rallyId === 2);
+    return fin && orig.length > 0 && JSON.stringify(orig) === JSON.stringify(L2.records);
   },
   simulate(seed, ticks) {
     const S = Sim.create(seed, 3, DEFAULT_CONFIG, 1), L = new ShotLogger(), c = [new ScriptController(), new ScriptController()];
@@ -2236,14 +2726,18 @@ const SelfTest = {
 // Starts in PLAY MODE: P2 = TabPFN-only bot (landing + dynamics + own shots from TabPFN, CEM planner).
 // =====================================================================
 const IdleController = { observe() {}, act: () => ({ move: { x: 0, y: 0 } }) };
-const OPPONENT_NAME = 'TabPFN-3.5';      // the name players see for the TabPFN opponent
+// The name players see for the TabPFN opponent. Follows the model the server runs (TabPFN-3.5 by default).
+let OPPONENT_NAME = 'TabPFN-3.5';
 const SETTINGS = { windStrength: '×', noiseMult: '×', reach: ' m', playerSpeed: ' m/s', friction: ' m/s²', grip: '×', lag: ' s', botShotSlowdown: '×' };
 
 const App = {
   init() {
     this.$ = id => document.getElementById(id);
     const qs = new URLSearchParams(location.search);
-    this.devFlag = qs.get('dev') !== '0';                 // developer mode is the default; ?dev=0 = clean player view
+    // developer mode is the default; ?dev=0 = clean player view (the recorded demo defaults to the clean view)
+    this.devFlag = window.DEMO_RECORDING ? qs.get('dev') === '1' : qs.get('dev') !== '0';
+    this.capture = qs.get('capture') === '1';
+    this.captionScale = +(qs.get('captionScale') || 1);          // video capture: captions last the same video time at any speed
     if (this.devFlag) document.body.classList.add('dev');   // reveals the technical panels
     Input.debugAllowed = this.devFlag;
     Guard.strictThrow = this.devFlag;               // development: a provenance violation throws visibly
@@ -2266,17 +2760,28 @@ const App = {
     this.p2human = new HumanController(Input, KEYMAP_P2);
     // P2 bot: every regressor is a thin adapter over the existing TabPFN connection.
     this.bot = new BotController({ makeRegressor: task => new TabPFNRegressorAdapter(TabPFNClient, task) });
-    this.playMode = 'bot'; this.mode = 'live'; this.started = false; this.paused = false; this.pendingEnv = null;
+    this.playMode = 'bot'; this.mode = 'live'; this.started = false; this.paused = false; this.switching = false; this.pendingEnv = null;
+    // Watch mode (bot vs sparring robot), shuttle worlds and the learning chart
+    this.watch = false; this.sparring = new SparringController('crosscourt', () => this.S);
+    this.ralliesInWorld = 0; this.ralliesInStyle = 0; this.curWorld = 'normal';
+    this.bot.landing.onScore = r => LearningChart.add('landing', r.err);
+    this.bot.anticip.onScore = r => LearningChart.add('antic', r.err);
+    for (const k of Worlds.keys) this.$('world-sel').add(new Option(WORLDS[k].name, k));
+    for (const [k, v] of Object.entries(SPARRING_STYLES)) this.$('style-sel').add(new Option(v, k));
+    this.$('world-desc').textContent = WORLDS.normal.desc;
     this.bindUI();
     this.$('seed').value = String(Math.floor(Math.random() * 1e6));
-    TabPFNClient.health().then(() => this.showServiceStatus());
     this.names = ['You', OPPONENT_NAME];
+    TabPFNClient.onChange = () => this.syncModel();
+    if (!window.DEMO_RECORDING) TabPFNClient.health();
     this.S = Sim.create('menu', 1, this.cfg, 0); this.S.events = [];
     this.ctrls = [IdleController, IdleController];
     if (qs.get('dev') === '1') this.$('devtools').open = true;   // ?dev=1 also opens (and loads) the developer tools
     requestAnimationFrame(ts => this.frame(ts));
     if (location.hash === '#selftest') this.showSelfTest();
+    else if (window.DEMO_RECORDING) this.startDemo(window.DEMO_RECORDING);
     else if (qs.get('start') === 'bot') this.startBot();            // link shortcut: skip the start screen
+    window.demoAdvance = n => this.demoAdvance(n);
   },
 
   bindUI() {
@@ -2285,8 +2790,28 @@ const App = {
     // Before the first game of the session, explain how to play; then start the chosen mode.
     const begin = start => (this.helpSeen ? start() : this.showHelp(start));
     this.$('start-bot').onclick = () => begin(() => this.startBot());
-    this.$('start-hotseat').onclick = () => begin(() => { this.playMode = 'human'; this.newMatch(); });
+    this.$('start-hotseat').onclick = () => begin(() => { this.playMode = 'human'; this.watch = false; this.newMatch(); });
+    this.$('start-watch').onclick = () => this.startBot(true);       // hands-free: no instructions needed
+    this.$('world-sel').onchange = e => { e.target.blur(); this.setWorld(e.target.value); };
+    this.$('style-sel').onchange = e => { e.target.blur(); this.setStyle(e.target.value); };
+    for (const id of ['world-every', 'style-every', 'watch-speed']) this.$(id).onchange = e => e.target.blur();
     this.$('help-close').onclick = () => this.closeHelp();
+    // Developer: switch the TabPFN checkpoint (local) or the inference backend on the server.
+    // Switch the TabPFN checkpoint (or, in developer mode, local/API) on the server, also mid-match:
+    // the game pauses until the new model is loaded (syncModel resumes it), so no rally is lost to loading.
+    const switchTo = async (changes, el) => {
+      el.blur();                                     // give the keyboard back to the game
+      this.switching = this.started;
+      this.$('tp-switch-status').textContent = 'Switching…';
+      try { await TabPFNClient.configure(changes); }
+      catch (e) {
+        this.switching = false;
+        this.banner('Could not switch the model: ' + (e.message || e), 4000);
+        this.$('tp-switch-status').textContent = 'Switch failed: ' + (e.message || e); this.syncModel();
+      }
+    };
+    this.$('tp-sel-model').onchange = e => switchTo({ model: e.target.value }, e.target);
+    this.$('tp-sel-backend').onchange = e => switchTo({ backend: e.target.value }, e.target);
     this.$('warm-skip').onclick = () => this.finishWarmup(true);
     this.$('pause-retry').onclick = () => this.retryTabPFN();
     this.$('restart').onclick = () => this.newMatch();
@@ -2302,7 +2827,7 @@ const App = {
     this.$('dl-json').onclick = () => this.download('badminton_shots.json', this.logger.toJSON(), 'application/json');
     this.$('dl-context').onclick = () => this.download('tabpfn_context.json', JSON.stringify(this.contextExport(), null, 1), 'application/json');
     this.$('clearlog').onclick = () => { this.logger = new ShotLogger(); this.lastRally = null; };
-    this.$('reset-bot').onclick = () => { this.bot.clearMemory(); if (this.playMode === 'bot' && this.started) this.startBot(); };
+    this.$('reset-bot').onclick = () => { this.bot.clearMemory(); LearningChart.reset(); if (this.playMode === 'bot' && this.started) this.startBot(this.watch); };
     this.$('devtools').addEventListener('toggle', () => { if (this.$('devtools').open) this.loadDevTools(); });
     for (const k of Object.keys(SETTINGS)) {
       const el = this.$(k), out = this.$('o-' + k), unit = SETTINGS[k];
@@ -2355,15 +2880,41 @@ const App = {
     if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
   },
 
+  /** The server's TabPFN model changed (first health check, loading finished, developer switch):
+   *  update the opponent's name everywhere, the developer switch, and the start-screen status. */
+  syncModel() {
+    const C = TabPFNClient, info = C.info;
+    if (C.backend === 'tabpfn' && C.modelShort) OPPONENT_NAME = C.modelShort;
+    for (const el of document.querySelectorAll('.opp-name')) el.textContent = OPPONENT_NAME;
+    document.title = `Badminton: play singles against ${OPPONENT_NAME}`;
+    if (this.playMode === 'bot') { this.names[1] = OPPONENT_NAME; this.$('name1').textContent = OPPONENT_NAME; }
+    const selM = this.$('tp-sel-model'), selB = this.$('tp-sel-backend');
+    if (info && info.models && !selM.options.length) for (const m of info.models) selM.add(new Option(m.name, m.key));
+    if (info && info.modelKey) selM.value = info.modelKey;
+    if (C.inference === 'local' || C.inference === 'api') selB.value = C.inference;
+    selM.disabled = C.inference !== 'local' || (C.online && !C.ready);   // API = always TabPFN-3.5; wait while loading
+    selB.disabled = !info || C.inference === 'mock';
+    this.$('tp-switch-status').textContent = info ? C.status : '';
+    if (this.switching) {
+      if (C.online && !C.ready) this.banner(`Loading ${OPPONENT_NAME}… The game is paused.`, 60000);
+      else {                                         // loaded (or failed): resume; failures pause via the usual Retry screen
+        this.switching = false; TabPFNHealth.reset(); TabPFNHealth.lastMs = null;
+        this.banner(C.ready ? `Now playing against ${OPPONENT_NAME}.` : `Couldn't load the model. ${C.status}`, 3000);
+      }
+    }
+    this.showServiceStatus();
+  },
+
   /** On the start screen, explain plainly when the opponent cannot be reached (two-player mode still works). */
   showServiceStatus() {
     const el = this.$('start-status'), b = TabPFNClient.base();
     let msg = '';
     if (b === null) msg = `To play against ${OPPONENT_NAME}, start the game server (python server.py) and open http://localhost:8000. Two-player mode works without it.`;
     else if (!TabPFNClient.online) msg = TabPFNClient.backend === 'none'
-      ? `${OPPONENT_NAME} is not set up on this server yet (missing TabPFN access token). Two-player mode is available.`
+      ? `${OPPONENT_NAME} is not set up on this server yet. Two-player mode is available.` + (this.devFlag ? ` (${TabPFNClient.status})` : '')
       : `Can't reach ${OPPONENT_NAME} right now. Check that the game server is running, then reload. Two-player mode is available.`;
     else if (TabPFNClient.backend !== 'tabpfn') msg = `This server is not connected to the TabPFN model, so ${OPPONENT_NAME} can't play. Two-player mode is available.`;
+    else if (!TabPFNClient.ready) msg = `Loading ${OPPONENT_NAME}… The first start downloads the model, which can take a few minutes.`;
     el.hidden = !msg; el.textContent = msg;
   },
 
@@ -2374,8 +2925,9 @@ const App = {
   },
 
   /** Play vs the TabPFN bot: warm up first unless a valid stored TabPFN context exists. */
-  startBot() {
-    this.playMode = 'bot';
+  startBot(watch = false) {
+    this.playMode = 'bot'; this.watch = watch;
+    if (watch) this.sparring.style = this.$('style-sel').value;
     this.$('start').classList.add('hidden');
     if (this.bot.hasValidStoredContext()) {
       this.bot.setMode('play'); this.bot.prefitAll(); this.newMatch();
@@ -2385,8 +2937,16 @@ const App = {
     } else this.startWarmup();
   },
 
+  /** vs the bot, its shots to a human fly slower; in watch mode the robot plays practice-pace shots (x1.6) to the
+   *  bot. Set before the warm-up too, so the warm-up shots behave like the match shots. */
+  applyModeCfg() {
+    this.cfg.slowShotsTo = this.playMode !== 'bot' ? null : this.watch ? 1 : 0;
+    this.cfg.slowShotsFactor = this.watch ? 1.6 : null;
+  },
+
   startWarmup() {
     const W = BOTCFG.warmup;
+    this.applyModeCfg();
     this.matchId++;
     this.S = Sim.createPractice(this.$('seed').value.trim() + '-warmup', this.cfg, this.matchId, W.machineShots, W.botShots);
     this.bot.reset(); this.bot.setMode('warmup');
@@ -2408,41 +2968,176 @@ const App = {
   newMatch() {
     const seed = this.$('seed').value.trim() || '1', bestOf = +this.$('bestof').value;
     this.matchId++;
-    this.cfg.slowShotsTo = this.playMode === 'bot' ? 0 : null;    // vs the bot, its shots to P1 fly slower
+    this.applyModeCfg();
     this.S = Sim.create(seed, bestOf, this.cfg, this.matchId);
     const botP2 = this.playMode === 'bot';
     this.bot.reset(); this.bot.setMode('play');
-    this.liveCtrls = [this.p1, botP2 ? this.bot : this.p2human];
+    this.liveCtrls = [botP2 && this.watch ? this.sparring : this.p1, botP2 ? this.bot : this.p2human];
     this.setNames(botP2 ? 'bot' : 'human');
     this.ctrls = this.liveCtrls; this.mode = 'live'; this.started = true; this.paused = false;
     this.lastRally = null; this.rallyActions = []; this.acc = 0;
+    Recorder.event({ k: 'snap', v: Sim.snapshot(this.S) });
     for (const id of ['start', 'warmup', 'pause', 'overlay']) this.$(id).classList.add('hidden');
     this.$('replay-status').textContent = '';
     this.processEvents();
-    const first = botP2 ? 'You serve first.' : `${this.names[0]} serves first.`;
+    const first = botP2 && !this.watch ? 'You serve first.' : `${this.names[0]} serves first.`;
     this.banner(`New match: ${bestOf === 1 ? 'first to 21' : 'best of 3 games'}. ${first}` + (this.devFlag ? ` (seed "${seed}")` : ''));
   },
 
   setNames(mode) {
-    this.names = mode === 'bot' ? ['You', OPPONENT_NAME] : ['Player 1', 'Player 2'];
+    const robot = `Sparring robot (${SPARRING_STYLES[this.sparring.style]})`;
+    this.names = mode === 'bot' ? [this.watch ? robot : 'You', OPPONENT_NAME] : ['Player 1', 'Player 2'];
     this.$('name0').textContent = this.names[0]; this.$('name1').textContent = this.names[1];
-    this.$('subtitle').textContent = mode === 'bot' ? `Singles · you vs ${OPPONENT_NAME}` : 'Singles · two players';
+    Recorder.event({ k: 'names', v: this.names.slice() });
+    this.$('subtitle').textContent = mode !== 'bot' ? 'Singles · two players'
+      : this.watch ? `Watch mode · sparring robot vs ${OPPONENT_NAME}` : `Singles · you vs ${OPPONENT_NAME}`;
     this.$('aicard').hidden = mode !== 'bot';
+    this.$('learncard').hidden = mode !== 'bot';
+    this.$('watch-ctl').hidden = !(mode === 'bot' && this.watch);
     this.$('mind-row').hidden = mode !== 'bot';
     this.$('court-btn').parentElement.hidden = false;
   },
   /** "You" reads as a person; everyone else is named. */
-  isYou(i) { return this.playMode === 'bot' && i === 0; },
+  isYou(i) { return this.playMode === 'bot' && !this.watch && i === 0; },
+
+  /** DEVELOPER: record the live session from now on (see tools/record_demo.js). */
+  startRecording() { Recorder.start(this); return true; },
+  stopRecording() { return Recorder.stop(); },
+
+  /** Replay a recording with no server: the simulator re-runs the recorded actions and the recorded TabPFN
+   *  outputs are shown at the ticks they appeared. Captions are timed in game ticks, so a video capture
+   *  (which advances frame by frame) shows them for the same game time. */
+  startDemo(rec) {
+    document.body.classList.add('demo');
+    this.$('watch-speed').value = '1';                            // play the recording at normal speed
+    this.mode = 'demo'; this.playMode = 'bot'; this.watch = true; this.started = true; this.paused = false; this.acc = 0;
+    this.liveBot = this.bot; this.bot = new RecordedBot();
+    this.sparring.style = rec.style;
+    this.demo = { rec, k: 0, ai: 0, ei: 0, vi: 0, cur: [null, null], caption: null, queue: [], seenEst: false, seenAp: false };
+    const D = this.demo;
+    this.ctrls = [{ observe() {}, act: () => D.cur[0] || { move: { x: 0, y: 0 } } }, this.bot];
+    this.S = Sim.restore(rec.snapshot); this.S.events = [];
+    LearningChart.pts = JSON.parse(JSON.stringify(rec.chart.pts)); LearningChart.marks = JSON.parse(JSON.stringify(rec.chart.marks));
+    LearningChart.n = rec.chart.n; LearningChart.dirty = true;
+    this.replayLogger = new ShotLogger();
+    for (const id of ['start', 'warmup', 'pause', 'overlay']) this.$(id).classList.add('hidden');
+    this.setNames('bot');
+    if (rec.names) { this.names = rec.names.slice(); this.$('name0').textContent = this.names[0]; this.$('name1').textContent = this.names[1]; }
+    this.$('subtitle').textContent = `Recorded match · sparring robot vs ${OPPONENT_NAME}`;
+    const note = this.$('demo-note'); note.hidden = false;
+    note.textContent = `Recorded match, replayed without a server. Every prediction you see was made live by ${OPPONENT_NAME}` +
+      ` running locally (${(rec.created || '').slice(0, 10)}).`;
+    const label = new URLSearchParams(location.search).get('label');      // video capture: e.g. "3.5× speed"
+    if (label && !this.$('demo-label')) {
+      const el = document.createElement('div'); el.id = 'demo-label'; el.textContent = label;
+      el.style.cssText = 'position:fixed;left:16px;bottom:16px;padding:6px 12px;border-radius:6px;font:600 15px system-ui,sans-serif;' +
+                         'background:rgba(0,0,0,.6);color:#fff;z-index:20';
+      document.body.appendChild(el);
+    }
+    this.applyDemoEvents();
+    this.demoCaption(`Recorded match: ${OPPONENT_NAME} vs a sparring robot. Every prediction shown was made live by ${OPPONENT_NAME}.`, 6);
+  },
+  /** Captions are queued (one never cuts another off) and timed in game ticks, scaled for video capture. */
+  demoCaption(text, secs, now = false) {
+    const D = this.demo;
+    if (now) D.queue = [];                                        // a world switch replaces whatever is showing
+    D.queue.push({ text, ticks: Math.round(secs * (this.captionScale || 1) / DT) });
+    if (!D.caption || now) this.nextDemoCaption();
+  },
+  nextDemoCaption() {
+    const D = this.demo, c = D.queue.shift(), b = this.$('banner');
+    D.caption = c ? { text: c.text, until: D.k + c.ticks } : null;
+    if (c) { b.textContent = c.text; b.classList.add('show'); } else b.classList.remove('show');
+  },
+  applyDemoEvents() {
+    const D = this.demo, R = D.rec, E = R.events;
+    while (D.ei < E.length && E[D.ei].t <= D.k) {
+      const e = E[D.ei++];
+      if (e.k === 'world') {
+        this.S.pendingCfg = Worlds.apply(this.S.pendingCfg, e.v);
+        this.demoCaption(`New shuttle world from the next rally: ${WORLDS[e.v].name}. ${OPPONENT_NAME} isn't told. Watch the chart.`, 6, true);
+      } else if (e.k === 'snap') { this.S = Sim.restore(e.v); this.S.events = []; }
+      else if (e.k === 'names') { this.names = e.v.slice(); this.$('name0').textContent = this.names[0]; this.$('name1').textContent = this.names[1]; }
+      else if (e.k === 'chart') LearningChart.add(e.v[0], e.v[1]);
+      else if (e.k === 'mark') LearningChart.mark(e.v);
+      else {
+        this.bot.apply(e.k, e.v);
+        if (e.k === 'est' && e.v && !D.seenEst) {
+          D.seenEst = true;
+          this.demoCaption(`Shaded ellipse: where ${OPPONENT_NAME} thinks the shuttle will land. It tightens as more of the flight is seen.`, 6);
+        }
+        if (e.k === 'ap' && e.v && !D.seenAp) {
+          D.seenAp = true;
+          this.demoCaption(`Dotted ring: where ${OPPONENT_NAME} expects the robot's next shot to land.`, 6);
+        }
+      }
+    }
+  },
+  /** One recorded game tick. */
+  demoTick() {
+    const D = this.demo, R = D.rec;
+    if (D.k >= R.ticks) { this.startDemo(R); return; }            // loop
+    while (D.ai < R.acts.length && R.acts[D.ai][0] === D.k) { const a = R.acts[D.ai++]; D.cur[a[1]] = a[2]; }
+    this.bot.cur = D.cur[1];
+    let env = null;
+    while (D.vi < R.env.length && R.env[D.vi][0] === D.k) env = R.env[D.vi++][1];
+    Sim.step(this.S, this.ctrls, this.replayLogger, env);
+    for (const e of this.S.events.splice(0)) if (e.type === 'point' && (!D.caption || D.k > D.caption.until)) this.banner(this.describePoint(e), 2500);
+    D.k++;
+    this.applyDemoEvents();
+    if (D.caption && D.k > D.caption.until) this.nextDemoCaption();
+  },
+  /** Video capture: advance n game ticks and draw (the normal frame loop does not advance in capture mode). */
+  demoAdvance(n) {
+    for (let i = 0; i < n; i++) this.demoTick();
+    this.thinking = this.bot.thinking;
+    this.renderer.draw(this.S, { debug: false, selectedShot: Input.selectedShot, bot: this.bot, botIdx: 1, mind: false, names: this.names, watch: true });
+    this.updateUI();
+    return this.demo.k;
+  },
+
+  /** Shuttle world from the next rally (through pendingCfg, so it is part of the rally snapshot and replays). */
+  setWorld(key, auto = false) {
+    this.cfg = Worlds.apply(this.cfg, key);
+    if (this.S) this.S.pendingCfg = Worlds.apply(this.S.pendingCfg, key);
+    Recorder.event({ k: 'world', v: key });
+    this.$('world-sel').value = key; this.$('world-desc').textContent = WORLDS[key].desc;
+    this.ralliesInWorld = 0;
+    this.banner(`${auto ? 'New shuttle world' : 'Shuttle world'} from the next rally: ${WORLDS[key].name}. ${OPPONENT_NAME} is not told.`, 3500);
+  },
+  setStyle(key, auto = false) {
+    this.sparring.style = key; this.$('style-sel').value = key; this.ralliesInStyle = 0;
+    if (this.playMode === 'bot') this.setNames('bot');
+    LearningChart.mark('style: ' + SPARRING_STYLES[key]);
+    if (auto) this.banner(`The sparring robot changes its style: ${SPARRING_STYLES[key]}.`, 3000);
+  },
+  /** After every point: automatic world / style switches (watch mode and the "Change world" option). */
+  afterPoint() {
+    const we = +this.$('world-every').value, se = +this.$('style-every').value;
+    this.ralliesInWorld++; this.ralliesInStyle++;
+    if (we && this.ralliesInWorld >= we) {
+      const ks = Worlds.keys, cur = this.$('world-sel').value;
+      this.setWorld(ks[(ks.indexOf(cur) + 1) % ks.length], true);
+    }
+    if (this.watch && se && this.ralliesInStyle >= se) {
+      const ks = Object.keys(SPARRING_STYLES);
+      this.setStyle(ks[(ks.indexOf(this.sparring.style) + 1) % ks.length], true);
+    }
+  },
 
   botActive() { return this.ctrls[1] === this.bot; },
 
   frame(ts) {
     const dt = this.lastTs ? Math.min(0.1, (ts - this.lastTs) / 1000) : 0;
     this.lastTs = ts;
-    if (this.started && !this.paused && !this.helpOpen) {
+    if (this.mode === 'demo' && !this.capture && !this.helpOpen) {
+      this.acc += dt * +this.$('watch-speed').value;
+      let n = 0;
+      while (this.acc >= DT && n++ < 60) { this.demoTick(); this.acc -= DT; }
+    } else if (this.started && !this.paused && !this.helpOpen && !this.switching && this.mode !== 'demo') {
       // Slow motion while the bot waits for TabPFN on something that matters now (never blocks rendering).
       const thinking = () => this.mode === 'live' && this.botActive() && BOTCFG.slowmo.on && this.bot.isCritical();
-      this.acc += dt * (thinking() ? BOTCFG.slowmo.speed : 1);
+      this.acc += dt * (thinking() ? BOTCFG.slowmo.speed : 1) * (this.watch && this.mode !== 'replay' ? +this.$('watch-speed').value : 1);
       let n = 0;
       while (this.acc >= DT && n++ < 30) {
         this.tick(); this.acc -= DT;
@@ -2451,9 +3146,10 @@ const App = {
       this.thinking = thinking();
       if (this.mode === 'live' && this.botActive() && TabPFNHealth.unavailable()) this.pauseUnavailable();
     }
+    if (this.mode === 'demo') this.thinking = this.bot.thinking;
     if (!Sim.someoneMustHit(this.S) || this.mode !== 'live') Input.click = null;   // no stale clicks
     this.renderer.draw(this.S, { debug: Input.debug, selectedShot: Input.selectedShot, bot: this.botActive() ? this.bot : null,
-                                 botIdx: 1, mind: this.$('mind').checked, names: this.names });
+                                 botIdx: 1, mind: this.$('mind').checked, names: this.names, watch: this.watch });
     this.updateUI();
     requestAnimationFrame(t => this.frame(t));
   },
@@ -2465,6 +3161,7 @@ const App = {
     const acts = Sim.step(this.S, this.ctrls, this.mode === 'replay' ? this.replayLogger : this.logger, env);
     if (this.mode === 'live') this.rallyActions.push(acts);
     this.processEvents();
+    if (Recorder.rec && this.mode === 'live') Recorder.tickDone(acts, env);
   },
 
   processEvents() {
@@ -2472,13 +3169,19 @@ const App = {
     for (const e of evs) {
       if (e.type === 'rallyStart' && this.mode === 'live') {
         this.rallySnap = Sim.snapshot(this.S); this.rallyActions = []; this.provStart = this.bot.providerLog.length;
+        const w = this.S.cfg.world || 'normal';            // a new shuttle world just took effect: mark the chart
+        if (w !== this.curWorld) { this.curWorld = w; LearningChart.mark(WORLDS[w].name); }
       } else if (e.type === 'point') {
         if (this.mode === 'replay') { this.finishReplay(); return; }
         if (this.mode !== 'live') continue;
         this.lastRally = { snap: this.rallySnap, actions: this.rallyActions, matchId: this.S.matchId, rallyId: e.rallyId,
                            providerLog: this.botActive() ? this.bot.providerLog.slice(this.provStart || 0) : [] };
         this.banner(this.describePoint(e), 3500);
-      } else if (e.type === 'matchOver') this.showMatchOver();
+        if (this.playMode === 'bot') this.afterPoint();
+      } else if (e.type === 'matchOver') {
+        this.showMatchOver();
+        if (this.watch) setTimeout(() => { if (this.watch && this.S.phase === 'over') this.newMatch(); }, 5000);   // keeps going hands-free
+      }
       else if (e.type === 'practiceShot') {
         this.$('warm-bar').style.width = Math.round(100 * e.done / e.total) + '%';
         this.$('warm-text').textContent = `${e.done} / ${e.total} practice shots`;
@@ -2494,6 +3197,7 @@ const App = {
       : `The game is paused until ${OPPONENT_NAME} responds again. Check your connection and that the game server is running.`;
     this.$('pause-detail').textContent = `${TabPFNClient.status} ${TabPFNHealth.lastError || ''} (no answer for over ${BOTCFG.unavailableMs / 1000} s; the bot never switches to another method)`;
     this.$('pause').classList.remove('hidden');
+    if (this.watch) setTimeout(() => { if (this.paused && this.watch) this.retryTabPFN(); }, 5000);   // hands-free: retry by itself
   },
   async retryTabPFN() {
     this.$('pause-text').textContent = `Reconnecting to ${OPPONENT_NAME}…`;
@@ -2632,6 +3336,12 @@ const App = {
     // --- bot status (play mode shows only status, counters, the 100 % TabPFN indicator, calibration) ---
     const b = this.bot, st = TabPFNHealth.status(), badge = this.$('tp-badge');
     this.$('aicard').hidden = !this.botActive();      // only while playing against TabPFN-3.5
+    this.$('learncard').hidden = !this.botActive();
+    if (!this.$('learncard').hidden && (LearningChart.dirty || this.chartW !== this.$('learn-chart').clientWidth)) {
+      this.chartW = this.$('learn-chart').clientWidth;
+      LearningChart.draw(this.$('learn-chart'), this.renderer.col);
+      set('learn-stats', LearningChart.statsText(this.bot.anticip));
+    }
     this.$('mind-row').hidden = !this.botActive();
     badge.className = 'badge ' + ({ connected: 'ok', slow: 'warn', unavailable: 'bad', idle: '' }[st] || '');
     set('tp-badge', `TabPFN: ${st}`);
@@ -2649,6 +3359,7 @@ const App = {
     // Player-facing status line
     const busy = b.status === 'waiting' || this.thinking;
     const [dot, label] = !this.botActive() ? ['', ''] :
+      this.switching ? ['warn', `Loading ${OPPONENT_NAME}…`] :
       b.mode === 'warmup' ? ['warn', `${OPPONENT_NAME} is warming up`] :
       st === 'unavailable' ? ['bad', `${OPPONENT_NAME} is offline`] :
       st === 'rate-limited' ? ['warn', `${OPPONENT_NAME} is busy, retrying`] :
@@ -2659,7 +3370,9 @@ const App = {
     const conf = b.plan && b.plan.pHit != null ? b.plan.pHit : null;
     this.$('conf-bar').style.width = conf === null ? '0%' : Math.round(conf * 100) + '%';
     set('conf-text', conf === null ? '–' : Math.round(conf * 100) + '%');
-    set('tp-counts', `${Guard.counters.landing} / ${Guard.counters.dynamics} / ${Guard.counters.shot} · ≈${Math.round(CallLog.apiCalls * BOTCFG.tokensPerCall / 1000)}k tokens`);
+    const cost = TabPFNClient.rateLimited || CallLog.apiCalls ? `≈${Math.round(CallLog.apiCalls * BOTCFG.tokensPerCall / 1000)}k tokens` : 'local, no tokens';
+    set('tp-counts', `${Guard.counters.landing} / ${Guard.counters.dynamics} / ${Guard.counters.shot} · ${cost}`);
+    set('tp-model', TabPFNClient.describe());
     set('tp-lat', `${TabPFNHealth.lastMs === null ? '–' : TabPFNHealth.lastMs + ' ms'} · ${b.replanMs == null ? '–' : b.replanMs.toFixed(1) + ' ms'}`);
     set('tp-late', `${b.stats.late} · ${TabPFNHealth.failed}`);
     const c = b.contextSizes();

@@ -1,2 +1,19 @@
+# secrets and local environment
 .env
+.venv/
 __pycache__/
+.tabpfn_models/
+.DS_Store
+
+# local notes (not part of the submission)
+CLAUDE.md
+IMPROVEMENTS.md
+
+# regenerable experiment outputs (see experiments/README.md)
+experiments/cache/
+experiments/data/
+experiments/data_adapt/
+experiments/logs/
+experiments/results/*.csv.gz
+experiments/results/latency_*.csv
+demo/.frames/

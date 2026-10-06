@@ -1,2 +1,4 @@
-tabpfn-client>=0.6
-numpy
+# Tested with Python 3.13 on macOS (Apple M3). tabpfn brings torch, scikit-learn, scipy, pandas and matplotlib.
+tabpfn==9.1.0          # local inference: TabPFN-3.5 weights on CUDA / MPS / CPU (default backend)
+tabpfn-client==0.6.1   # Prior Labs API inference (--backend api)
+numpy>=2.0

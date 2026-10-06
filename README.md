@@ -1,113 +1,190 @@
-# Badminton: play singles against TabPFN-3.5
+# TabPFN-3.5 for live play: a badminton bot that adapts while it plays
 
-`badminton.html` is a top-down singles badminton game. You play against **TabPFN-3.5**, an opponent that learns the court as you play, or against a friend on one keyboard.
-- **Every learned or predictive part of the bot comes from TabPFN:** where the shuttle will land, how the bot itself moves, and the uncertainty used by the planner.
-- **Planner:** CEM model predictive control with a Monte Carlo chance constraint.
-- **Other methods** (filters, kNN, RLS, gradient boosting, and so on) exist only in `dev-tools.js`, a developer module that is loaded on demand.
+For the TabPFN-3.5 Hackathon I built a badminton-playing bot that runs on TabPFN-3.5 in real time. It plays singles in the browser against a human, or against a sparring robot, and every prediction behind its decisions comes from TabPFN-3.5. There's no other model in the loop.
 
-## Run
+![TabPFN-3.5 playing a sparring robot while the shuttle world changes](demo/demo.gif)
+
+**Try it without installing anything:** download [`demo/index.html`](demo/index.html) and open it in a browser (or open `/demo/` on the repo's GitHub Pages site). It's a single file holding a recorded match. Every prediction you see was made live by TabPFN-3.5, and it's replayed without a server. There's also an [80-second video](demo/demo.mp4) of the same match.
+
+Playing badminton is mostly a series of small prediction problems, made under time pressure, and each one fits naturally into a table:
+- where is this shot going to land,
+- how will my body move if I push this way,
+- which shot should I play back,
+- and where is the other player likely to hit next?
+
+The bot keeps a table for each of these, filled with what has happened so far in the match. Whenever it needs an answer it hands the table to TabPFN-3.5 and gets back a prediction with a range. A planner then turns those answers, and how unsure they are, into movement.
+
+There is no physics engine inside the bot and no model trained on the game. It never played badminton before the warm-up, and everything it knows it learns during the match from a few dozen examples. You can also change the shuttle mid-match (feather, heavy, low gravity, a storm), and the bot has to notice from the shots alone.
+
+
+## Why this matters
+
+Most machine learning works as train, then deploy. You collect data, fit a model, ship it, and hope the world stays the way it was. Live systems don't work like that. The floor gets slippery, the wind picks up, a part wears out, a different person starts using the machine. Something that acts in the real world has to keep up while it's running, usually from very little data, and it has to know when it isn't sure.
+
+That's what this project is really about. Badminton is just a convenient place to test it: it's fast, noisy and partly hidden (the bot never sees the wind), and the rules can change mid-match. In that setting TabPFN-3.5 does four things that matter for any live system:
+
+- **Learning becomes adding a row.** Every shot, landing and step the bot takes goes into a table, and the very next prediction already uses it. There's no training run, no retraining schedule and no hyperparameters to retune when things change. The model is always the same; only the context changes.
+- **It adapts to changing dynamics.** The same model, with no task-specific code, learns three different kinds of dynamics while playing:
+  - **How the shuttle flies:** in six different worlds, it gets to 0.21–0.39 m landing error after about 120 shots, roughly half the error of gradient boosting, random forest or kNN on the same data.
+  - **How its own body moves:** it relearns after the court turns slippery.
+  - **How a particular opponent plays:** it learns where they tend to hit next.
+
+  When the world switches without warning, it settles again in 14–22 shots.
+- **Its uncertainty is good enough to act on.** The planner only commits to a movement if TabPFN's ranges say it will reach the shuttle with at least 90% probability. That only works if those ranges are honest, and they were: 91–94% coverage in every world, with the tightest intervals of any model I tried. Gradient boosting's ranges held only 64–72% of the time, which would make an agent take risks it shouldn't.
+- **It works from the first minute.** About 30 practice shots are enough to start playing. A model that needs thousands of examples before it's useful can't run live.
+
+Running a model like this in a live loop also means dealing with latency. A TabPFN call takes 1–4.5 seconds on my laptop, while the game runs at 120 steps per second. The patterns I used to make that work aren't specific to badminton:
+- **Never wait on the model:** the controller keeps acting on its last plan while a prediction is in flight.
+- **Batch the questions:** one call returns a 625-point grid of movement predictions that the planner can query thousands of times.
+- **Ask urgent questions first:** landing and shot choice jump ahead of background work.
+- **Degrade safely:** follow the last plan, then stop. The bot never quietly switches to a different method.
+
+I think the same loop could apply well beyond games. That loop is: learn the dynamics from a few dozen live examples, predict with calibrated uncertainty, plan against that uncertainty, and keep updating. I haven't tested any of these, but the problem has the same shape:
+- a robot on changing floors or terrain,
+- a drone in gusty wind,
+- an exoskeleton adjusting to one person's gait,
+- a training machine that adapts to an athlete,
+- a process controller whose plant drifts over time,
+- a game character that learns how each player actually plays.
+
+The honest limits are speed (this suits decisions on the scale of a second, or a loop that queries a batched surrogate) and the first handful of examples in a brand-new situation. Starting from a rough physics guess and letting TabPFN learn the correction fixed most of the slow start in my experiments.
+
+## Playing against it fairly
+
+The best way to judge a bot like this is to play it, so I tried hard to make the match fair and not give the bot anything a human doesn't have.
+
+- **Same body.** Both players move with the same physics: the same top speed, acceleration, reach and court. If you change the speed, grip or input delay in the settings, it changes for both sides.
+- **Same eyes, or slightly worse.** The bot sees nothing you can't see on screen: where both players are and where the shuttle is. You see the shuttle move smoothly, while the bot only gets its position every 50 ms, with a bit of noise added. It never sees the wind, the random part of a shot, or where the shuttle is going to land. It finds out where a shot landed only after it lands, same as you.
+- **Same rules for hitting.** Both players can only hit a shuttle that lands within reach, and both have the same two seconds to choose a shot and a target.
+- **No homework.** TabPFN-3.5 isn't trained on this game. Before the first match the bot watches about 20 practice shots and hits 10 of its own, and everything after that it learns during play.
+- **Nobody is told when the rules change.** If you switch to a feather shuttle or low gravity mid-match, the bot isn't told. It has to notice from the shots, just like you.
+
+There are two places where I adjusted things on purpose, and both are visible in the settings:
+
+- **Slower bot shots.** By default, shots from the bot to the human take 3 times longer to arrive (1–4× in the settings). They land on exactly the same spot; you just get more time to react. A person needs a few hundred milliseconds to see a shot and start moving, and this evens that out.
+- **Slow motion while TabPFN thinks.** A TabPFN prediction takes 1–4.5 seconds on my laptop, which is far slower than a person's reaction. So while the bot is waiting on an answer that matters, the whole game runs in slow motion for both players. You can turn this off in the settings if you want to see what happens without it.
+
+## Running it
 
 ```
+python3.13 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-# .env: TABPFN_TOKEN=...   (https://platform.priorlabs.ai/account/api-keys)
-python server.py           # imports tabpfn-client (~10 s), then serves http://localhost:8000
+cp .env.example .env        # put your TABPFN_TOKEN in here
+python server.py            # then open http://localhost:8000
 ```
 
-- Open `http://localhost:8000` and click **Play vs TabPFN-3.5**. **Two players, one keyboard** is the other option.
-- The page shows only what a player needs: score, whose serve, plain-language hints, TabPFN-3.5's status and confidence, settings and the shot log. If the opponent can't be reached (no server, no token, usage limit), the start screen and the pause screen say so in plain words.
-- **Colour themes:** Classic (the original), Midnight, Clay and Arena, switched with the swatches under the title. Each has a light and a dark version that follows the system setting; the choice is remembered in the browser.
-- **Developer mode is on by default:** technical panels (TabPFN call counters, ≈ tokens, latency, provenance and calibration badges, context sizes, what the model sees), the Developer tools panel (collapsed; it loads when opened), the seed field, the debug view (`G`) and visible provenance-guard errors.
-- `?dev=0` gives the clean player view without them; `?dev=1` also opens the Developer tools panel straight away.
-- `#selftest` runs all checks in the browser.
-- Before the first game, a **How to play** screen explains the controls and rules; press **H** at any time to bring it back (the game pauses; H, Esc or the button resumes).
-- `?start=bot` skips the start screen and the instructions.
+You can get a token at https://platform.priorlabs.ai/account/api-keys. You don't need API access to play. By default TabPFN-3.5 runs on your own machine, and the first time it runs, the server downloads the TabPFN-3.5 weights (about 876 MB) from Hugging Face. That needs a one-time licence acceptance, which the same token takes care of. Loading then takes around 40 seconds, and the start screen says when TabPFN is ready.
 
-## How the bot works (play mode)
+The start screen has three modes:
 
-**Warm-up.** Before the first rally, a machine fires about 20 practice shots while the bot moves with random exploratory commands and hits 10 practice shots of its own. This fills TabPFN's context with real landings and movements.
-- No TabPFN calls are made during warm-up.
-- It can be skipped. It's skipped automatically when a stored context is large enough (saved in localStorage as rows only).
-- A "low context" notice shows while the context is still small.
+- **Play vs TabPFN-3.5.** You, the human, against the bot. You start at the bottom. Move with WASD, pick a shot with 1 (clear), 2 (drop) or 3 (smash), then click where you want it to land. Press H at any time for the rules.
+- **Watch TabPFN-3.5 learn.** TabPFN plays a sparring robot with a fixed playing style while the shuttle world changes every few rallies. Good if you want to watch it adapt without playing.
+- **Two players, one keyboard.** Human vs human, no TabPFN.
 
-| Part | TabPFN rows | Target | When it's called |
-|---|---|---|---|
-| Landing | time since hit; observed x/y/z at each checkpoint so far; finite-difference velocity; shot-type cue; hitter x/y; bot x/y | landing minus the last observed position (x, y), and the remaining flight time, as 10/50/90 % quantiles | 0.2 / 0.4 / 0.6 s after the opponent's hit; the estimate is carried forward between checkpoints |
-| Movement dynamics | x, y, vx, vy, ux, uy, previous ux, previous uy | Δvx, Δvy per 0.1 s | the context is refit as new movement arrives; then one batched grid query (see below) |
-| Own shot choice | shot type, hitter x/y, target x/y, distance, game time, last-3 miss | landing minus target | once per bot hit, for 24 random candidates in one batch |
+## What I found
 
-- **Planner:** CEM (48 candidates × 4 iterations over 1.2 s of commands).
-  - It is warm-started by shifting the previous plan.
-  - Each candidate gets 8 Monte Carlo rollouts, which include TabPFN's movement uncertainty and a landing point and arrival time sampled from TabPFN's landing quantiles.
-  - The cost penalizes any shortfall of P(distance to landing ≤ r at arrival) below 0.9, plus terminal distance, control effort, and recovery to the base position.
-  - The horizon is tied to TabPFN's predicted arrival time.
-  - One replan takes about 9 ms.
-- **Shot choice:** score = P(lands in) × P(opponent can't reach), both computed from TabPFN's predicted landing spread and the opponent's distance and speed limit.
+![Landing error in six shuttle worlds as TabPFN-3.5 sees more shots](experiments/figures/x1_worlds.png)
 
-### Why the movement model is a "TabPFN grid surrogate"
+To check whether TabPFN-3.5 can really keep up when conditions change, I ran it outside the game too. I tried six shuttle worlds, sudden unannounced switches between them, and six scripted players with different habits. The full write-up is in [experiments/REPORT.md](experiments/REPORT.md). In short:
 
-The spec offered two options: a strict per-step TabPFN rollout, or a local linearization built purely from TabPFN queries. Measurements decided between them:
-- **Latency:** each predict takes 1.1–1.5 s with a cached fit and 4–6 s with a fresh fit. A strict rollout needs 12 sequential calls per plan, so 15 s or more.
-- **Rate and quota:** the API allows **60 predict requests per minute**, and every request costs about **10,000 tokens** regardless of size (quoted by the API's cost estimator). The account has a daily cap of 5M and a monthly cap of 20M tokens.
-- **Accuracy:**
-  - Direct TabPFN predictions of Δv are very accurate: 0.047 m/s error, versus 0.75 m/s for predicting no change, with 98–99 % interval coverage.
-  - A local Jacobian at one command point does not extrapolate, because acceleration saturates (1.06 m/s error).
-  - A polar command lattice was 0.24 m/s off even with exact values.
-  - A Cartesian grid interpolates well.
+- After about 120 shots in a world, its median landing error was 0.21–0.39 m in all six worlds. Gradient boosting, random forest and kNN trained on the same rows ended up at roughly twice that.
+- It starts slowly. With only 5–10 shots it's no better than those models. Letting it correct a simple physics guess fixes most of that, at least offline.
+- After an unannounced switch it needs 14–22 shots to settle again. Adding a "how many shots ago" column to each row helped, so the game now does that.
+- It learned where the scripted players would hit next and what shot they'd play. Against a random player it correctly learned nothing.
+- When it said it was 90% sure, it was right 91–94% of the time, in every world. That matters because the bot uses those numbers to decide whether it can reach a shot.
 
-The default is therefore **one batched TabPFN query on a 5×5 velocity × 5×5 command grid (625 rows)**, interpolated multilinearly and tagged `tabpfn-linearized`.
-- Every value in it is TabPFN's own prediction, and TabPFN's quantile spread is carried along.
-- It is rebuilt only after the movement context is refit, at most every 6 s, so the planner never waits on the network.
-- The **strict per-step rollout** is still available as a clearly labelled developer setting.
-- **Limitation:** the grid queries assume the previous command equals the current one. Command-lag effects are learned from the context rows but are only exactly represented in strict mode.
+The weak spots are the first few shots in a new world, the shots right after a change, and speed.
 
-### Cost control
-- **Stacked targets:** by default, the targets of one task are stacked into **one** TabPFN regression: each target is standardized and a target-indicator column is added. This costs one request instead of 2–3. The spec asked for one regressor per coordinate; that layout is one switch away, in the developer tools or with `BOTCFG.stackTargets = false`.
-- **Rate budget:** a client-side budget respects the per-minute limit. Landing and shot calls take priority, and movement refreshes keep a reserve. A landing checkpoint that is over budget is skipped and the previous estimate carried forward; another method is never substituted.
-- **Usage display:** the panel shows the estimated tokens used this session.
+## How the bot thinks
 
-### Degraded behaviour (never another predictor)
-1. **A TabPFN call is late:** the bot keeps replanning on the current TabPFN surrogate and the carried-forward landing estimate. If the surrogate is stale (more than 20 s old with failing refreshes), it follows the shifted previous plan.
-2. **The plan runs out:** the bot brakes (zero command) and shows *"TabPFN slow: bot is waiting"*.
-3. **TabPFN unavailable for more than 5 s** (errors, rate limit or quota): the rally pauses with *"TabPFN unavailable"* and a **Retry** button.
-4. **Slow motion:** while a call that matters is pending (an opponent shot in flight, or the bot must hit), the game runs at 5 % speed. This is adjustable and can be turned off. It never blocks rendering.
+The bot keeps four small tables, each a sliding window over recent play. Whenever it needs an answer it sends the table and the new row to TabPFN-3.5 and gets back a prediction with a range.
 
-### Enforcement of the TabPFN-only rule
-- **Provenance tags:** every provider output carries one. `ProvenanceGuard` admits only `tabpfn` and `tabpfn-linearized` in play mode.
-  - In production it refuses anything else, so the bot brakes.
-  - In developer mode (the default) it also throws a visible error.
-  - Outputs from the server's mock backend (`backend:mock`) are refused too.
-- **Separate code:** play-mode code contains no non-TabPFN provider. A static check confirms that none of the developer class names appear in `badminton.html`'s script. `dev-tools.js` is requested only when the developer panel is opened or `#selftest` runs; the server log shows this.
-- **Tests:** they inject `knn`, `oracle`, filter and mock outputs and assert that each is refused and that the bot never moves on them.
-- **On screen:** a **"100% TabPFN"** badge with per-task call counters, a calibration badge (90 % coverage for landing and movement), a confidence meter (P reach), the status badge (connected / slow / rate-limited / unavailable) and the latencies.
+| Question | What a row contains | What TabPFN predicts |
+|---|---|---|
+| Where will this shot land? | time since the hit, shuttle positions seen so far, its velocity, shot type, both players' positions, how many shots ago | offset from the last seen position, and the remaining flight time |
+| How will I move? | position, velocity, current and previous command | change in velocity over 0.1 s |
+| Which shot should I play? | shot type, my position, target, distance, game time, my recent miss | how far the shot will land from where I aimed |
+| Where will the human hit next? | where they hit from, my position, their last shot, rally shot number | where their next shot lands |
 
-### Court change, settings, replay
-- **"Slippery court / tired legs"** sets grip × 0.35 and speed × 0.75 mid-rally for both players. It's recorded as an event in the action log, so replays stay exact. The bot isn't told; it adapts as the recency window of movement rows refills.
-- **Reaction time:** against the bot, its shots towards you fly **3x slower** (setting "Bot's shots fly slower", 1–4x). They land on exactly the same spot; only the flight is stretched in time, so wind and noise are unchanged. Shots towards the bot keep normal speed.
-- **Settings:** wind, noise, r, speed, friction, grip, command lag, the bot-shot slow-down and slow motion, in a collapsible section. Defaults reproduce Milestone 1's movement exactly; this is tested over 3000 ticks.
-- **Replay:** replays use the recorded actions and make **no TabPFN calls**. Provider outputs are logged per rally.
-- **Determinism:** the simulation is deterministic. Which TabPFN answer arrives at which tick depends on network timing, so a live bot game can't be reproduced from the seed alone. Recorded actions and outputs make it replayable.
+- **Landing:** it asks at 0.2, 0.4 and 0.6 seconds after the human hits.
+- **Movement:** a planner tries 48 possible movement plans over the next 1.2 seconds. It simulates each one 8 times using TabPFN's movement predictions and uncertainty, and picks a plan that reaches the shuttle with at least 90% probability. Asking TabPFN at every simulated step would be far too slow, so the planner uses a grid of 625 TabPFN predictions that it refreshes every few seconds.
+- **Shot choice:** it tries 24 random shots and picks the one most likely to land in and be hard to reach.
+- **Next-shot guess:** this only draws a marker on the court ("TabPFN-3.5 expects your next shot here"). It doesn't change how the bot plays.
 
-## Developer tools (`dev-tools.js`, hidden by default)
-- **Session-only provider switching**, never saved; a reload always returns to TabPFN-only play:
-  - landing: TabPFN, kNN, kernel, gradient boosting, ensemble, linear extrapolation, physics fit (with a constant-wind mismatch option), EKF, particle filter, oracle;
-  - dynamics: TabPFN, kNN, RLS, RLS + CUSUM, frozen, gradient boosting, ensemble, oracle;
-  - planner: CEM, random shooting, MPPI.
-- **Monitoring:** status, calibration per provider, and the provenance call log.
-- **Compare estimators on this shot:** every method on the last opponent shot, using the TabPFN outputs recorded during play, so no new calls.
+In this mode every prediction has to come from TabPFN. Each answer is tagged with its source and anything else is rejected. The comparison models I used while building it (kNN, filters, gradient boosting and so on) live in `web/dev-tools.js`, which the game doesn't load unless you open the developer panel. The tests check that answers from those models are refused.
 
-## Measured so far (real TabPFN, before the daily quota ran out)
-- **Live play-mode run** against a scripted human-paced opponent (Milestone 3 surrogate):
-  - the bot reached 6 of 9 opponent shots and won 5 of 8 rallies;
-  - 100 % of the outputs it used had provenance `tabpfn` / `tabpfn-linearized`, with 0 refused;
-  - landing error median 0.30 m; landing 90 % coverage 100 % (n = 7); own-shot coverage 100 % (n = 10);
-  - movement 90 % coverage 56 %, so its uncertainty is somewhat underestimated;
-  - median call 1.4 s.
-- **Offline accuracy:** TabPFN predicts movement Δv with 0.047 m/s error and 98–99 % coverage on held-out transitions.
+If TabPFN is slow, the bot keeps following its last plan and then stops. If there's no answer for 5 seconds the game pauses with a Retry button; watch mode retries by itself.
 
-## Files
-| File | Purpose |
-|---|---|
-| `badminton.html` | game, play-mode TabPFN bot, self-tests |
-| `dev-tools.js` | developer module (all non-TabPFN providers), lazily loaded |
-| `server.py` | local server and TabPFN proxy: `/api/predict` (stacking), `/api/fit`, `/api/gbr` (developer only) |
-| `.env` | `TABPFN_TOKEN` (never sent to the browser, never served, never logged) |
+## Things to try
+
+- **Shuttle world** (next to the court): normal, heavy shuttle, feather shuttle, low gravity, steady gale and gusty storm. A change applies from the next rally. You can also have it switch automatically every 5 or 10 rallies.
+- **Learning chart:** a small chart shows how far off TabPFN's landing guesses were, shot by shot, with a line at each world change.
+- **Slippery court:** makes both players slide, and the bot has to relearn how it moves.
+- **Replay:** replays the last point exactly.
+- **Themes:** there are four colour themes.
+- **Developer details:** shown by default (call counts, timing, calibration, and a panel with the comparison models). Open `/?dev=0` for a clean view, or `/?start=bot` to skip the start screen.
+
+## Running TabPFN locally or through the API
+
+By default the server runs TabPFN-3.5 on your own machine with the open weights from [Prior-Labs/tabpfn_3_5](https://huggingface.co/Prior-Labs/tabpfn_3_5). It picks an NVIDIA GPU if there is one, then Apple's GPU, then the CPU.
+
+`python server.py --backend api` uses Prior Labs' hosted API instead, pinned to TabPFN-3.5. That costs about 10k tokens per call and allows at most 60 calls a minute, which adds up quickly over a match.
+
+If the API isn't available, the game doesn't stop. That covers no token, quota or rate limit reached, or the network being down. TabPFN-3.5 is then downloaded directly from Hugging Face and runs locally on your machine instead, and the rest of the match continues on the same model. The switch takes around 30–40 seconds the first time while the model loads (plus the one-time download). The game pauses briefly during that and then carries on. If there's no token at all, the one-time licence acceptance for the download opens in your browser instead. If you'd rather it waited for the API, set `TABPFN_FALLBACK=none` in `.env`.
+
+You can also pick `--model v3.5-fast`, which is about four times faster, or the experimental multiclass version. The model can be switched mid-match from the dropdown.
+
+On my M3 MacBook with TabPFN-3.5 on the GPU, a landing prediction takes about 1.2 s, the movement grid 4.5 s and a shot choice 1.2 s. Urgent requests go first. Settings live in `.env`; see `.env.example`.
+
+## What's in the repo
+
+```
+server.py                 game server and TabPFN inference
+web/badminton.html        the game, the bot, the planner and the in-browser tests
+web/dev-tools.js          comparison models used during development (not used in play)
+tests/run_selftest.js     headless tests
+experiments/              the experiments behind the report
+demo/                     the recorded match (index.html), the video and the GIF
+tools/                    scripts that record a match and build the demo, the video and the GIF
+docs/                     the original project brief and an example of the bot's landing table
+```
+
+Run the tests with:
+
+```
+node tests/run_selftest.js                      # the game and the bot
+.venv/bin/python tests/test_server_fallback.py  # the API-to-local fallback (fakes the API failures)
+```
+
+To redo the experiments (about half an hour on an M3; TabPFN answers are cached, so an interrupted run picks up where it stopped):
+
+```
+node experiments/adaptation/gen_adapt.js --seeds 2
+.venv/bin/python experiments/adaptation/run_adapt.py --device mps --n-estimators 4
+.venv/bin/python experiments/adaptation/analyze_adapt.py
+```
+
+## How the demo is made
+
+The game can record itself. During a live match it saves the starting state, every player's actions, each shuttle-world switch, and everything the bot showed on screen (its landing estimate, its next-shot guess, its confidence and the learning chart). The simulator is deterministic, so replaying the recorded actions reproduces the match exactly, and the recorded TabPFN-3.5 outputs are shown at the same moments. The replay needs no server, no Python and no token.
+
+```
+python server.py --port 8765                           # local TabPFN-3.5
+node tools/record_demo.js --warm 10 --rec 10           # play and record (about 20 minutes)
+node tools/build_demo.js                               # demo/index.html with the recording inside
+node tools/render_video.js --width 1920 --height 1080 --seconds 30 --speed 1   # a video clip, rendered frame by frame
+tools/make_gif.sh 43 13                                # demo/demo.gif for this README, cut from demo/demo.mp4
+```
+
+## Known issues
+
+- **Movement uncertainty is too narrow.** The bot's 90% movement ranges hold only about 57% of the time in play. The movement grid is built at one spot on the court, ignores the delay between commands, and doesn't count its own interpolation error.
+- **Urgent requests can still wait.** A 4.5-second movement-grid request can't be interrupted, so a landing request that arrives just after it has to wait. Using TabPFN-3.5-Fast for the grid would probably help.
+- **The physics-plus-TabPFN combination isn't in the game yet.** It's what fixes the slow start in a new world, but it would break the TabPFN-only rule.
+- **Next-shot guesses need a long session:** roughly 10–15 minutes against one playing style before they're useful.
+- **Shot choice only looks one shot ahead.**
+- **The experiments use the game's own simulator and scripted players,** and real people are a lot less predictable.
+
+## Licence
+
+The code is MIT licensed. The TabPFN-3.5 weights aren't included. They're downloaded from Hugging Face under Prior Labs' own licence, which allows research and evaluation but not commercial use.

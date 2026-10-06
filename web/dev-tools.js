@@ -423,6 +423,7 @@
         <tr><td>Dynamics provider</td><td>${esc(b.dynamics.reg ? b.dynamics.reg.provenance || 'tabpfn' : '–')} · 90% coverage ${pc(b.dynamics.cov90)} · mean err ${errs(b.dynamics.err)} m/s</td></tr>
         <tr><td>Own-shot model</td><td>90% coverage ${pc(b.shots.cov90)}</td></tr>
         <tr><td>Planner</td><td>${esc(b.planner.name || 'cem')} · status ${b.status}</td></tr>
+        <tr><td>TabPFN model</td><td>${esc(TabPFNClient.describe())}</td></tr>
         <tr><td>API calls this session</td><td>${CallLog.apiCalls} (≈${Math.round(CallLog.apiCalls * BOTCFG.tokensPerCall / 1000)}k tokens) · rate budget used ${RateBudget.used()}/${BOTCFG.rate.perMinute} per min · deferred ${RateBudget.deferred}</td></tr>
       </table>`;
       const log = this.root.querySelector('#dv-log');
